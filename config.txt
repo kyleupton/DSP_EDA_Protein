@@ -1,0 +1,3 @@
+initialDataPath : /Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/DSP_Protein_Data/Initial Dataset.xlsx
+QCDataPath : /Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/DSP_Protein_Data/Default_QC.xlsx
+labWorksheet01Path : /Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/Lab_Worksheet_P1001660010371A.txt
