@@ -1,3 +1,4 @@
+projectName : 'Larisa_Spheroids'
 rootDir : /Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/DSP_Protein_Data/
 initialDataPath : Initial Dataset.xlsx
 QCDataPath : Default_QC.xlsx
