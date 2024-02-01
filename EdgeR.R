@@ -1,5 +1,3 @@
-
-
 ###############################################################################################
 ###############################      Author : Kyle R. Upton      ##############################
 ###############################################################################################
@@ -16,7 +14,8 @@
 ###############################################################################################
 ################################### Required R packages #######################################
 ### Ensure all libraries are installed
-Libraries <- c('edgeR', 'optparse')
+Libraries <- c('edgeR', 'optparse', 'stringr')
+
 lapply(Libraries, require, character.only = TRUE)
 rm(Libraries)
 
@@ -62,13 +61,11 @@ plot_MDS <- function(y, group){
   #### Plot Multi Dimensional Scaling
   #### Points and Colours need work
   pdf( paste("MDS_Plot_", opt$runname, ".pdf", sep = "") , width = 8 , height = 8 ) # in inches
-  points <- c(0,1,2,3,4,7,8)
-  # points <- rep(c(0,1,2,3,4,7,8,9,10,11,15,16,17,18,19,20,21),2)
+  # points <- c(0,1,2,3,4,7,8)
+  points <- rep(c(0,1,2,3,4,7,8,9,10,11,15,16,17,18,19,20,21),2)
   # colors <- c("blue", "blue", "blue", "blue", "blue", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "red", "red", "red", "red", "red")
-  # colors <- c("blue", "blue", "blue", "darkgreen", "darkgreen", "darkgreen", "red", "red", "red", "red", "red")
-  
   plotMDS(y, pch=points[group])
-  legend("topleft", legend=levels(group), pch=points, ncol=1)
+  # legend("topleft", legend=levels(group), pch=points, ncol=1)
   dev.off()
 }
 
@@ -129,7 +126,15 @@ print_Results <- function(qlf, y, filename){
   write.table(results2.tbl, file = filename, sep = ",", row.names = TRUE)
 }
 
-
+parse_input <- function(vector){
+  result = list()
+  for (i in seq_along(vector)){
+    c <- as.vector(strsplit(vector[i],':')[[1]])[2]
+    c <- as.vector(strsplit(c,',')[[1]])
+    result[[i]] <- c
+  }
+  return(result)
+}
 
 
 
@@ -140,19 +145,36 @@ print_Results <- function(qlf, y, filename){
 configDir = '/Users/upton6/Documents/notebooks/Nanostring/Larisa_Spheroids/DSP_EDA_Protein'
 setwd(configDir)
 config = readLines("EdgeR_Config.txt")
-# data[1]
-# as.list(strsplit(data[1], ','))
-groupHead = as.list(strsplit(config[1], ',')[[1]])[1]
-comp1 = as.list(strsplit(config[2], ',')[[1]])[1]
-compName = as.list(strsplit(config[3], ',')[[1]])[1]
+
+# groupHead = as.list(strsplit(config[1], ',')[[1]])[1]
+# comp1 = as.list(strsplit(config[2], ',')[[1]])[1]
+# compName = as.list(strsplit(config[3], ',')[[1]])[1]
 
 
-groupHead = as.list(strsplit(config[grepl("GROUP:", config)]))#[1], ',')[[1]])[1]
+groupHead = as.vector(config[grepl("GROUP:", config)])
 groupHead
+groups = list()
+for (i in seq_along(groupHead)){
+  print(groupHead[i])
+  g <- as.vector(strsplit(groupHead[i],":")[[1]])[2]
+  print(g)
+  g <- as.vector(strsplit(g,"[.]")[[1]])
+  print(g)
+  groups[[i]] <- g
+  # result[[i]] <- c
+}
+groups
 
-data = readLines("file.txt")
-data[grepl("dfw: ", data)]
 
+compRaw = as.vector(config[grepl("COMPARISON:", config)])
+comps = parse_input(compRaw)
+comps
+
+compNameRaw = as.vector(config[grepl("COMP_NAME:", config)])
+compNames = parse_input(compNameRaw)
+compNames
+
+# XXX
 
 ###############################################################################################
 ###############################  Read-in probe counts ###############################
@@ -203,182 +225,203 @@ setwd(exportDir)
 
 #### Make sure pos and neg controls have been dropped!!!
 
-groupHead = paste(groupHead)
+# groupHead = paste(groupHead)
 # targets[groupHead][,1]
 
 
-
-group <- factor(paste0(targets[groupHead][,1]))
-
-
-
-
-# group <- factor(paste0(targets$"Substrate"))
-# group <- factor(paste0("group", ".", targets$Substrate, ".", targets$Diff))
-# group <- factor(paste0("group", ".", targets$Substrate, ".", targets$Diff, ".", targets$Layer))
-group
-
-
-# y <- DGEList(counts, group = group)
-# # y <- calcNormFactors(y)
-# y$samples
-# # y$norm.factors
-
-
-y <- setup_y(counts,group)
-
-
-
-plot_First(y)
-# pdf( paste("plotMD_", opt$runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
-# #### Plot first sample
-# plotMD(cpm(y, log=TRUE), column=1)
-# abline(h=0, col="red", lty=2, lwd=2)
-# dev.off() # this tells [R] to close and stop writing to the pdf.
-
-
-#### Plot Multi Dimensional Scaling
-#### Points and Colours need work
-plot_MDS(y,group)
-# pdf( paste("MDS_Plot_", opt$runname, ".pdf", sep = "") , width = 8 , height = 8 ) # in inches
-# #set up to use colours for grade and symbols for label
-# # points <- c(0,1,2,15,16,17)
-# # points <- c(0,1,2,3,4,7,8,9,10,11,15,16,17,18,19,20,21)
-# # points <- rep(c(0,1,2,3,4,5,6),2)
-# points <- c(0,1,2,3,4,7,8)
-# # points <- rep(c(0,1,2,3,4,7,8,9,10,11,15,16,17,18,19,20,21),2)
-# # colors <- c("blue", "blue", "blue", "blue", "blue", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "red", "red", "red", "red", "red")
-# colors <- c("blue", "blue", "blue", "darkgreen", "darkgreen", "darkgreen", "red", "red", "red", "red", "red")
-# plotMDS(y, col=colors[group], pch=points[group])
-# legend("topleft", legend=levels(group), col=colors[group], pch=points, ncol=1)
-# dev.off() # this tells [R] to close and stop writing to the pdf.
+groups
+### Need to get this to work with multiple factors for group
+# tempGroups = list()
+# for (g in seq_along(groups)){
+#   print(groups[g][[1]])
+#   # tempGroups[[g]] = list()
+#   # test <- c("Substrate", "Diff")
+#   # test <- c(groups[g])
+#   # test
+#   # test2 <- mapply(function(x,y) targets[x][,y], test, 1)
+#   test2 <- mapply(function(x,y) targets[x][,y], groups[g][[1]], 1)
+#   group = vector()
+#   for (x in 1:range(dim(test2)[1])){
+#     group <- append(group, str_c(test2[x,],collapse="."))
+#   }
+#   # for (x in 1:range(length(groups[g])[[1]])){
+#   #   group <- append(group, str_c(groups[g][x,],collapse="."))
+#   # }
+#   
+#   # for (t in seq_along(groups[[g]])){
+#   #   print(groups[[g]][t])
+#   #   #   print(targets[groups[[g]][t]])
+#   #   # tempGroups[[g]][[t]] <- targets[groups[[g]][t]]
+#   #   # # tempGroups[[g]] <- append(tempGroups, targets[groups[[g]][t]])
+#   # }
+#   # group <- factor(paste0(targets[groups[g]][,1]))
+#   # print(group)
+# }
 
 
-#### Is this the best design set-up? Double check the use of 0 vs other options
-design <- make_Design(group)
-# design <- model.matrix(~0 + group)
-# colnames(design) <- levels(group)
-design
 
-y <- make_Disp(y, design)
-fit <- make_Fit(y, design)
+for (g in seq_along(groups)){
+  print(groups[g][[1]])
+  test2 <- mapply(function(x,y) targets[x][,y], groups[g][[1]], 1)
+  group = vector()
+  for (x in suppressWarnings(1:range(dim(test2)[1]))){
+    group <- append(group, str_c(test2[x,],collapse="."))
+  }
+  group <- factor(group)
+  # print(group)
+  y <- setup_y(counts,group)
+  # print(y)
+  plot_First(y)
+  plot_MDS(y,group)
+  #### Is this the best design set-up? Double check the use of 0 vs other options
+  design <- make_Design(group)
+  # design
+  y <- make_Disp(y, design)
+  fit <- make_Fit(y, design)
+  
+  
+  
+  
+  
+  # pdf( paste(opt$runname, "_plotBCV.pdf", sep = "") , width = 4 , height = 4 ) # in inches
+  # y <- estimateDisp(y, design, robust=TRUE)
+  # y$common.dispersion
+  # plotBCV(y)
+  # dev.off()
+  
+  # 
+  # pdf( paste("plotQLDisp_", opt$runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
+  # fit <- glmQLFit(y, design, robust=TRUE)
+  # head(fit$coefficients)
+  # plotQLDisp(fit)
+  # dev.off()
+  
+  
+  ###############################################################################################
+  ###############################  Run model and export results  ###############################
+  
+  for (c in length(comps[[g]])){
+    thisComp = comps[[g]][c]
+    print('thisComp')
+    print(thisComp)
+    compName = compNames[[g]][c]                      
+    print('compName')
+    print(compName)
+    con <- makeContrasts(paste(thisComp), levels=design)
+    # con <- makeContrasts(Hydrogel - Spheroid, levels=design)
+    
+    pdfName = paste("MD_plot", compName, ".pdf", sep="")
+    filename = paste("MD_plot", compName, ".csv", sep="")
+    pdfName2 = paste("MD_plot", compName, "_tr.pdf", sep="")
+    filename2 = paste("MD_plot", compName, "_tr.csv", sep="")
+    
+    qlf <- get_Results_QLF(fit, con, pdfName)
+    print_Results(qlf, y, filename)
+    tr <- get_Results_TR(fit, con, pdfName2)
+    print_Results(tr, y, filename2)
+  }
+  # 
+  # comp1 = as.list(strsplit(config[2], ',')[[1]])[1]
+  # paste(comp1)
+  # 
+  # 
+  # con <- makeContrasts(paste(comp1), levels=design)
+  # # con <- makeContrasts(Hydrogel - Spheroid, levels=design)
+  # 
+  # pdfName = paste("MD_plot", compName, ".pdf", sep="")
+  # filename = paste("MD_plot", compName, ".csv", sep="")
+  # pdfName2 = paste("MD_plot", compName, "_tr.pdf", sep="")
+  # filename2 = paste("MD_plot", compName, "_tr.csv", sep="")
+  # 
+  # 
+  # pdfName <- "MD_plot_Hydrogel_vs_Spheroid.pdf" #, width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Hydrogel_vs_Spheroid.csv"
+  # pdfName2 <- "MD_plot_Hydrogel_vs_Spheroid_tr.pdf"
+  # filename2 <- "MD_plot_Hydrogel_vs_Spheroid_tr.csv"
+  # qlf <- get_Results_QLF(fit, con, pdfName)
+  # print_Results(qlf, y, filename)
+  # tr <- get_Results_TR(fit, con, pdfName2)
+  # print_Results(tr, y, filename2)
+  # 
+  # 
 
-# pdf( paste(opt$runname, "_plotBCV.pdf", sep = "") , width = 4 , height = 4 ) # in inches
-# y <- estimateDisp(y, design, robust=TRUE)
-# y$common.dispersion
-# plotBCV(y)
-# dev.off()
+  
+  # 
+  # 
+  # 
+  # 
+  # con <- makeContrasts(group.Hydrogel.BDNF - group.Hydrogel.SD, levels=design)
+  # pdf( "MD_plot_Hydrogel_BDNF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Hydrogel_BDNF_vs_Hydrogel_SD.csv"
+  # 
+  # 
+  # con <- makeContrasts(group.Hydrogel.Dream - group.Hydrogel.SD, levels=design)
+  # pdf( "MD_plot_Hydrogel_Dream_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Hydrogel_Dream_vs_Hydrogel_SD.csv"
+  # 
+  # 
+  # con <- makeContrasts(group.Hydrogel.PDGF - group.Hydrogel.SD, levels=design)
+  # pdf( "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.csv"
+  # 
+  # 
+  # con <- makeContrasts(group.Hydrogel.Nil - group.Hydrogel.SD, levels=design)
+  # pdf( "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.csv"
+  # 
+  # 
+  # con <- makeContrasts(group.Spheroid.Hep - group.Spheroid.SD, levels=design)
+  # pdf( "MD_plot_Spheroid.Hep_vs_Spheroid_SD.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Spheroid.Hep_vs_Spheroid_SD.csv"
+  # 
+  # 
+  # 
+  # con <- makeContrasts(group.Spheroid.Hep.Inner - group.Spheroid.SD.Inner, levels=design)
+  # pdf( "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.SD.Inner.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.SD.Inner.csv"
+  # 
+  # 
+  # con <- makeContrasts(group.Spheroid.Hep.Outer - group.Spheroid.SD.Outer, levels=design)
+  # pdf( "MD_plot_Spheroid.Hep.Outer_vs_Spheroid.SD.Outer.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Spheroid.Hep.Outer_vs_Spheroid.SD.Outer.csv"
+  # 
+  # 
+  # con <- makeContrasts(group.Spheroid.SD.Inner - group.Spheroid.SD.Outer, levels=design)
+  # pdf( "MD_plot_Spheroid.SD.Inner_vs_Spheroid.SD.Outer.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Spheroid.SD.Inner_vs_Spheroid.SD.Outer.csv"
+  # 
+  # con <- makeContrasts(group.Spheroid.Hep.Inner - group.Spheroid.Hep.Outer, levels=design)
+  # pdf( "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.Hep.Outer.pdf" , width = 4 , height = 4 ) # in inches
+  # filename <- "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.Hep.Outer.csv"
+  # 
+  # 
+  # 
+  # qlf <- glmQLFTest(fit, contrast=con)
+  # topTags(qlf, 15)
+  # summary(decideTests(qlf))
+  # 
+  # ## Save plots and write results to file?
+  # # pdf( "MD_plot_Tumour_1_Tumour_0.pdf" , width = 4 , height = 4 ) # in inches
+  # par( mfrow=c(1 ,1) )
+  # plotMD(qlf)
+  # dev.off() # this tells [R] to close and stop writing to the pdf.
+  # 
+  # resultsbyP <- topTags(qlf, n = nrow(qlf$table))$table
+  # wh.rows.glm <- match( rownames( resultsbyP ) , rownames( y$counts ) )
+  # results2.tbl <- cbind (resultsbyP, "Tgw.Disp"=y$tagwise.dispersion[wh.rows.glm], "UpDown" = decideTestsDGE(qlf)[wh.rows.glm,], y$counts[wh.rows.glm,] )
+  # head (results2.tbl)
+  # write.table(results2.tbl, file = filename, sep = ",", row.names = TRUE)
+  
+  
+  
+  
+}  
+  
+  
 
+
+# length(comps[[2]])
 # 
-# pdf( paste("plotQLDisp_", opt$runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
-# fit <- glmQLFit(y, design, robust=TRUE)
-# head(fit$coefficients)
-# plotQLDisp(fit)
-# dev.off()
-
-
-###############################################################################################
-###############################  Run model and export results  ###############################
-paste(comp1)
-
-
-con <- makeContrasts(paste(comp1), levels=design)
-# con <- makeContrasts(Hydrogel - Spheroid, levels=design)
-
-pdfName = paste("MD_plot", compName, ".pdf", sep="")
-filename = paste("MD_plot", compName, ".csv", sep="")
-pdfName2 = paste("MD_plot", compName, "_tr.pdf", sep="")
-filename2 = paste("MD_plot", compName, "_tr.csv", sep="")
-
-
-pdfName <- "MD_plot_Hydrogel_vs_Spheroid.pdf" #, width = 4 , height = 4 ) # in inches
-filename <- "MD_plot_Hydrogel_vs_Spheroid.csv"
-pdfName2 <- "MD_plot_Hydrogel_vs_Spheroid_tr.pdf"
-filename2 <- "MD_plot_Hydrogel_vs_Spheroid_tr.csv"
-qlf <- get_Results_QLF(fit, con, pdfName)
-print_Results(qlf, y, filename)
-tr <- get_Results_TR(fit, con, pdfName2)
-print_Results(tr, y, filename2)
-
-
-
-
+# comps[[1]][1]
 # 
-# 
-# 
-# 
-# con <- makeContrasts(group.Hydrogel.BDNF - group.Hydrogel.SD, levels=design)
-# pdf( "MD_plot_Hydrogel_BDNF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Hydrogel_BDNF_vs_Hydrogel_SD.csv"
-# 
-# 
-# con <- makeContrasts(group.Hydrogel.Dream - group.Hydrogel.SD, levels=design)
-# pdf( "MD_plot_Hydrogel_Dream_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Hydrogel_Dream_vs_Hydrogel_SD.csv"
-# 
-# 
-# con <- makeContrasts(group.Hydrogel.PDGF - group.Hydrogel.SD, levels=design)
-# pdf( "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.csv"
-# 
-# 
-# con <- makeContrasts(group.Hydrogel.Nil - group.Hydrogel.SD, levels=design)
-# pdf( "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.csv"
-# 
-# 
-# con <- makeContrasts(group.Spheroid.Hep - group.Spheroid.SD, levels=design)
-# pdf( "MD_plot_Spheroid.Hep_vs_Spheroid_SD.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Spheroid.Hep_vs_Spheroid_SD.csv"
-# 
-# 
-# 
-# con <- makeContrasts(group.Spheroid.Hep.Inner - group.Spheroid.SD.Inner, levels=design)
-# pdf( "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.SD.Inner.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.SD.Inner.csv"
-# 
-# 
-# con <- makeContrasts(group.Spheroid.Hep.Outer - group.Spheroid.SD.Outer, levels=design)
-# pdf( "MD_plot_Spheroid.Hep.Outer_vs_Spheroid.SD.Outer.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Spheroid.Hep.Outer_vs_Spheroid.SD.Outer.csv"
-# 
-# 
-# con <- makeContrasts(group.Spheroid.SD.Inner - group.Spheroid.SD.Outer, levels=design)
-# pdf( "MD_plot_Spheroid.SD.Inner_vs_Spheroid.SD.Outer.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Spheroid.SD.Inner_vs_Spheroid.SD.Outer.csv"
-# 
-# con <- makeContrasts(group.Spheroid.Hep.Inner - group.Spheroid.Hep.Outer, levels=design)
-# pdf( "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.Hep.Outer.pdf" , width = 4 , height = 4 ) # in inches
-# filename <- "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.Hep.Outer.csv"
-# 
-# 
-# 
-# qlf <- glmQLFTest(fit, contrast=con)
-# topTags(qlf, 15)
-# summary(decideTests(qlf))
-# 
-# ## Save plots and write results to file?
-# # pdf( "MD_plot_Tumour_1_Tumour_0.pdf" , width = 4 , height = 4 ) # in inches
-# par( mfrow=c(1 ,1) )
-# plotMD(qlf)
-# dev.off() # this tells [R] to close and stop writing to the pdf.
-# 
-# resultsbyP <- topTags(qlf, n = nrow(qlf$table))$table
-# wh.rows.glm <- match( rownames( resultsbyP ) , rownames( y$counts ) )
-# results2.tbl <- cbind (resultsbyP, "Tgw.Disp"=y$tagwise.dispersion[wh.rows.glm], "UpDown" = decideTestsDGE(qlf)[wh.rows.glm,], y$counts[wh.rows.glm,] )
-# head (results2.tbl)
-# write.table(results2.tbl, file = filename, sep = ",", row.names = TRUE)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# makeContrasts(paste(comps[[1]][1]), levels=design)

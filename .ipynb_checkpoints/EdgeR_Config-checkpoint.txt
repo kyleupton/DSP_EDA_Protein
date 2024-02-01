@@ -1,6 +1,6 @@
-GROUP:Substrate,
-COMPARISON:Hydrogel - Spheroid, 
+GROUP:Substrate
+COMPARISON:Hydrogel - Spheroid
 COMP_NAME:Hydrogel_vs_Spheroid
-GROUP:Substrate,Diff
-COMPARISON:Hydrogel.BDNF - Hydrogel.SD,Hydrogel.Dream - Hydrogel.SD,Hydrogel.PDGF - Hydrogel.SD, 
-COMP_NAME:HydrogelBDNF_vs_HydrogelSD,HydrogelDream_vs_HydrogelSD,HydrogelPDGF_vs_HydrogelSD,
+GROUP:Diff.Substrate
+COMPARISON:Hydrogel.BDNF - Hydrogel.SD,Hydrogel.Dream - Hydrogel.SD,Hydrogel.PDGF - Hydrogel.SD
+COMP_NAME:HydrogelBDNF_vs_HydrogelSD,HydrogelDream_vs_HydrogelSD,HydrogelPDGF_vs_HydrogelSD
