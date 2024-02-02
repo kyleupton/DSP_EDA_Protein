@@ -15,24 +15,42 @@
 ################################### Required R packages #######################################
 ### Ensure all libraries are installed
 Libraries <- c('edgeR', 'optparse', 'stringr')
-
+print('Checking libraries:')
 lapply(Libraries, require, character.only = TRUE)
 rm(Libraries)
+print('If any values above are FALSE, library availability must be checked')
+print(' ')
 
 ###############################################################################################
 ###############################  Read-in arguments for DGE run ###############################
+# option_list = list(
+#   make_option(c("-d", "--rootdir"), type="character", default=NULL, 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-n", "--normpath"), type="character", default='Normalisation/NSNormDropped/', 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-f", "--file"), type="character", default='NanoStringNorm_49_none_none_low.cv.geo.mean.csv', 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-e", "--exportdir"), type="character", default="EdgeR", 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-r", "--runname"), type="character", default="Default", 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-i", "--sampleinfo"), type="character", default='sampleInfo_with_Wells.csv', 
+#               help="dataset file name", metavar="character")
+# ); 
 option_list = list(
+  make_option(c("-c", "--configPath"), type="character", default=NULL, 
+              help="dataset file name", metavar="character"),
   make_option(c("-d", "--rootdir"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-n", "--normpath"), type="character", default='Normalisation/NSNormDropped/', 
+  make_option(c("-n", "--normpath"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-f", "--file"), type="character", default='NanoStringNorm_49_none_none_low.cv.geo.mean.csv', 
+  make_option(c("-f", "--file"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-e", "--exportdir"), type="character", default="EdgeR", 
+  make_option(c("-e", "--exportdir"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-r", "--runname"), type="character", default="Default", 
+  make_option(c("-r", "--runname"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-i", "--sampleinfo"), type="character", default='sampleInfo_with_Wells.csv', 
+  make_option(c("-i", "--sampleinfo"), type="character", default=NULL, 
               help="dataset file name", metavar="character")
 ); 
 opt_parser = OptionParser(option_list=option_list);
@@ -45,7 +63,7 @@ opt = parse_args(opt_parser);
 
 setup_y <- function(counts,group){
   y <- DGEList(counts, group = group)
-  print(y$samples)
+  # print(y$samples)
   return(y)
 }
 
@@ -65,7 +83,7 @@ plot_MDS <- function(y, group){
   points <- rep(c(0,1,2,3,4,7,8,9,10,11,15,16,17,18,19,20,21),2)
   # colors <- c("blue", "blue", "blue", "blue", "blue", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "red", "red", "red", "red", "red")
   plotMDS(y, pch=points[group])
-  # legend("topleft", legend=levels(group), pch=points, ncol=1)
+  legend("topleft", legend=levels(group), pch=points, ncol=1)
   dev.off()
 }
 
@@ -137,44 +155,34 @@ parse_input <- function(vector){
 }
 
 
-
-
 ###############################################################################################
 ###############################  Read-in config ###############################
 
-configDir = '/Users/upton6/Documents/notebooks/Nanostring/Larisa_Spheroids/DSP_EDA_Protein'
+# configDir = '/Users/upton6/Documents/notebooks/Nanostring/Larisa_Spheroids/DSP_EDA_Protein'
+configDir = opt$configPath
 setwd(configDir)
 config = readLines("EdgeR_Config.txt")
 
-# groupHead = as.list(strsplit(config[1], ',')[[1]])[1]
-# comp1 = as.list(strsplit(config[2], ',')[[1]])[1]
-# compName = as.list(strsplit(config[3], ',')[[1]])[1]
-
-
 groupHead = as.vector(config[grepl("GROUP:", config)])
-groupHead
+# groupHead
 groups = list()
 for (i in seq_along(groupHead)){
-  print(groupHead[i])
+  # print(groupHead[i])
   g <- as.vector(strsplit(groupHead[i],":")[[1]])[2]
-  print(g)
   g <- as.vector(strsplit(g,"[.]")[[1]])
-  print(g)
   groups[[i]] <- g
-  # result[[i]] <- c
 }
-groups
-
+print('groups')
+print(groups)
 
 compRaw = as.vector(config[grepl("COMPARISON:", config)])
 comps = parse_input(compRaw)
-comps
+# comps
 
 compNameRaw = as.vector(config[grepl("COMP_NAME:", config)])
 compNames = parse_input(compNameRaw)
-compNames
+# compNames
 
-# XXX
 
 ###############################################################################################
 ###############################  Read-in probe counts ###############################
@@ -182,7 +190,6 @@ compNames
 rootDir = '/Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/DSP_Protein_Data/'
 
 normFile = file.path(rootDir, opt$normpath, opt$file)
-# normFile = file.path(rootDir, 'Normalisation/NSNormDropped/NanoStringNorm_49_none_none_low.cv.geo.mean.csv')
 rootDir
 normFile
 opt$normpath
@@ -193,11 +200,11 @@ setwd(rootDir)
 raw.data <- read.table(file = normFile,
                        header = TRUE,
                        sep=",")
-head( raw.data )
-dim(raw.data)
+# head( raw.data )
+# dim(raw.data)
 counts <- raw.data[ , c(2:dim(raw.data)[2]) ]
-dim(counts)
-head(counts)
+# dim(counts)
+# head(counts)
 rownames( counts ) <- raw.data[ , 1 ] # gene names
 
 
@@ -210,218 +217,51 @@ info <- read.delim(sampleInfo,
 targets <- info[ , c(2:dim(info)[2]) ]
 rownames( targets ) <- info[ , 1 ]
 targets = as.data.frame(t(targets))
-targets
+# targets
 
 
 ###############################################################################################
 ########################################  Set up model ########################################
 
 exportDir = file.path(rootDir, opt$exportdir)
-# exportDir = opt$exportdir
-# exportDir
 dir.create(exportDir, showWarnings = FALSE)
-# getwd()
 setwd(exportDir)
 
-#### Make sure pos and neg controls have been dropped!!!
-
-# groupHead = paste(groupHead)
-# targets[groupHead][,1]
-
-
 groups
-### Need to get this to work with multiple factors for group
-# tempGroups = list()
-# for (g in seq_along(groups)){
-#   print(groups[g][[1]])
-#   # tempGroups[[g]] = list()
-#   # test <- c("Substrate", "Diff")
-#   # test <- c(groups[g])
-#   # test
-#   # test2 <- mapply(function(x,y) targets[x][,y], test, 1)
-#   test2 <- mapply(function(x,y) targets[x][,y], groups[g][[1]], 1)
-#   group = vector()
-#   for (x in 1:range(dim(test2)[1])){
-#     group <- append(group, str_c(test2[x,],collapse="."))
-#   }
-#   # for (x in 1:range(length(groups[g])[[1]])){
-#   #   group <- append(group, str_c(groups[g][x,],collapse="."))
-#   # }
-#   
-#   # for (t in seq_along(groups[[g]])){
-#   #   print(groups[[g]][t])
-#   #   #   print(targets[groups[[g]][t]])
-#   #   # tempGroups[[g]][[t]] <- targets[groups[[g]][t]]
-#   #   # # tempGroups[[g]] <- append(tempGroups, targets[groups[[g]][t]])
-#   # }
-#   # group <- factor(paste0(targets[groups[g]][,1]))
-#   # print(group)
-# }
-
-
-
 for (g in seq_along(groups)){
-  print(groups[g][[1]])
+  # print(groups[g][[1]])
   test2 <- mapply(function(x,y) targets[x][,y], groups[g][[1]], 1)
   group = vector()
   for (x in suppressWarnings(1:range(dim(test2)[1]))){
     group <- append(group, str_c(test2[x,],collapse="."))
   }
   group <- factor(group)
-  # print(group)
   y <- setup_y(counts,group)
-  # print(y)
   plot_First(y)
   plot_MDS(y,group)
+  
   #### Is this the best design set-up? Double check the use of 0 vs other options
   design <- make_Design(group)
-  # design
   y <- make_Disp(y, design)
   fit <- make_Fit(y, design)
-  
-  
-  
-  
-  
-  # pdf( paste(opt$runname, "_plotBCV.pdf", sep = "") , width = 4 , height = 4 ) # in inches
-  # y <- estimateDisp(y, design, robust=TRUE)
-  # y$common.dispersion
-  # plotBCV(y)
-  # dev.off()
-  
-  # 
-  # pdf( paste("plotQLDisp_", opt$runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
-  # fit <- glmQLFit(y, design, robust=TRUE)
-  # head(fit$coefficients)
-  # plotQLDisp(fit)
-  # dev.off()
   
   
   ###############################################################################################
   ###############################  Run model and export results  ###############################
   
-  for (c in length(comps[[g]])){
+  for (c in 1:length(comps[[g]])){
     thisComp = comps[[g]][c]
-    print('thisComp')
-    print(thisComp)
     compName = compNames[[g]][c]                      
-    print('compName')
-    print(compName)
     con <- makeContrasts(paste(thisComp), levels=design)
-    # con <- makeContrasts(Hydrogel - Spheroid, levels=design)
-    
-    pdfName = paste("MD_plot", compName, ".pdf", sep="")
-    filename = paste("MD_plot", compName, ".csv", sep="")
-    pdfName2 = paste("MD_plot", compName, "_tr.pdf", sep="")
-    filename2 = paste("MD_plot", compName, "_tr.csv", sep="")
+
+    pdfName = paste("MD_plot_", compName, ".pdf", sep="")
+    filename = paste("MD_plot_", compName, ".csv", sep="")
+    pdfName2 = paste("MD_plot_", compName, "_tr.pdf", sep="")
+    filename2 = paste("MD_plot_", compName, "_tr.csv", sep="")
     
     qlf <- get_Results_QLF(fit, con, pdfName)
     print_Results(qlf, y, filename)
     tr <- get_Results_TR(fit, con, pdfName2)
     print_Results(tr, y, filename2)
   }
-  # 
-  # comp1 = as.list(strsplit(config[2], ',')[[1]])[1]
-  # paste(comp1)
-  # 
-  # 
-  # con <- makeContrasts(paste(comp1), levels=design)
-  # # con <- makeContrasts(Hydrogel - Spheroid, levels=design)
-  # 
-  # pdfName = paste("MD_plot", compName, ".pdf", sep="")
-  # filename = paste("MD_plot", compName, ".csv", sep="")
-  # pdfName2 = paste("MD_plot", compName, "_tr.pdf", sep="")
-  # filename2 = paste("MD_plot", compName, "_tr.csv", sep="")
-  # 
-  # 
-  # pdfName <- "MD_plot_Hydrogel_vs_Spheroid.pdf" #, width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Hydrogel_vs_Spheroid.csv"
-  # pdfName2 <- "MD_plot_Hydrogel_vs_Spheroid_tr.pdf"
-  # filename2 <- "MD_plot_Hydrogel_vs_Spheroid_tr.csv"
-  # qlf <- get_Results_QLF(fit, con, pdfName)
-  # print_Results(qlf, y, filename)
-  # tr <- get_Results_TR(fit, con, pdfName2)
-  # print_Results(tr, y, filename2)
-  # 
-  # 
-
-  
-  # 
-  # 
-  # 
-  # 
-  # con <- makeContrasts(group.Hydrogel.BDNF - group.Hydrogel.SD, levels=design)
-  # pdf( "MD_plot_Hydrogel_BDNF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Hydrogel_BDNF_vs_Hydrogel_SD.csv"
-  # 
-  # 
-  # con <- makeContrasts(group.Hydrogel.Dream - group.Hydrogel.SD, levels=design)
-  # pdf( "MD_plot_Hydrogel_Dream_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Hydrogel_Dream_vs_Hydrogel_SD.csv"
-  # 
-  # 
-  # con <- makeContrasts(group.Hydrogel.PDGF - group.Hydrogel.SD, levels=design)
-  # pdf( "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.csv"
-  # 
-  # 
-  # con <- makeContrasts(group.Hydrogel.Nil - group.Hydrogel.SD, levels=design)
-  # pdf( "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Hydrogel_PDGF_vs_Hydrogel_SD.csv"
-  # 
-  # 
-  # con <- makeContrasts(group.Spheroid.Hep - group.Spheroid.SD, levels=design)
-  # pdf( "MD_plot_Spheroid.Hep_vs_Spheroid_SD.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Spheroid.Hep_vs_Spheroid_SD.csv"
-  # 
-  # 
-  # 
-  # con <- makeContrasts(group.Spheroid.Hep.Inner - group.Spheroid.SD.Inner, levels=design)
-  # pdf( "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.SD.Inner.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.SD.Inner.csv"
-  # 
-  # 
-  # con <- makeContrasts(group.Spheroid.Hep.Outer - group.Spheroid.SD.Outer, levels=design)
-  # pdf( "MD_plot_Spheroid.Hep.Outer_vs_Spheroid.SD.Outer.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Spheroid.Hep.Outer_vs_Spheroid.SD.Outer.csv"
-  # 
-  # 
-  # con <- makeContrasts(group.Spheroid.SD.Inner - group.Spheroid.SD.Outer, levels=design)
-  # pdf( "MD_plot_Spheroid.SD.Inner_vs_Spheroid.SD.Outer.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Spheroid.SD.Inner_vs_Spheroid.SD.Outer.csv"
-  # 
-  # con <- makeContrasts(group.Spheroid.Hep.Inner - group.Spheroid.Hep.Outer, levels=design)
-  # pdf( "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.Hep.Outer.pdf" , width = 4 , height = 4 ) # in inches
-  # filename <- "MD_plot_Spheroid.Hep.Inner_vs_Spheroid.Hep.Outer.csv"
-  # 
-  # 
-  # 
-  # qlf <- glmQLFTest(fit, contrast=con)
-  # topTags(qlf, 15)
-  # summary(decideTests(qlf))
-  # 
-  # ## Save plots and write results to file?
-  # # pdf( "MD_plot_Tumour_1_Tumour_0.pdf" , width = 4 , height = 4 ) # in inches
-  # par( mfrow=c(1 ,1) )
-  # plotMD(qlf)
-  # dev.off() # this tells [R] to close and stop writing to the pdf.
-  # 
-  # resultsbyP <- topTags(qlf, n = nrow(qlf$table))$table
-  # wh.rows.glm <- match( rownames( resultsbyP ) , rownames( y$counts ) )
-  # results2.tbl <- cbind (resultsbyP, "Tgw.Disp"=y$tagwise.dispersion[wh.rows.glm], "UpDown" = decideTestsDGE(qlf)[wh.rows.glm,], y$counts[wh.rows.glm,] )
-  # head (results2.tbl)
-  # write.table(results2.tbl, file = filename, sep = ",", row.names = TRUE)
-  
-  
-  
-  
 }  
-  
-  
-
-
-# length(comps[[2]])
-# 
-# comps[[1]][1]
-# 
-# makeContrasts(paste(comps[[1]][1]), levels=design)

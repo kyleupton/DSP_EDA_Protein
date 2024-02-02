@@ -1,6 +1,9 @@
 GROUP:Substrate
 COMPARISON:Hydrogel - Spheroid
 COMP_NAME:Hydrogel_vs_Spheroid
-GROUP:Diff.Substrate
-COMPARISON:Hydrogel.BDNF - Hydrogel.SD,Hydrogel.Dream - Hydrogel.SD,Hydrogel.PDGF - Hydrogel.SD
-COMP_NAME:HydrogelBDNF_vs_HydrogelSD,HydrogelDream_vs_HydrogelSD,HydrogelPDGF_vs_HydrogelSD
+GROUP:Substrate.Diff
+COMPARISON:Hydrogel.BDNF - Hydrogel.SD,Hydrogel.Dream - Hydrogel.SD,Hydrogel.PDGF - Hydrogel.SD,Spheroid.Hep - Spheroid.SD
+COMP_NAME:Hydrogel_BDNF_vs_Hydrogel_SD,Hydrogel_Dream_vs_Hydrogel_SD,Hydrogel_PDGF_vs_Hydrogel_SD,Spheroid_Hep_vs_Spheroid_SD
+GROUP:Substrate.Diff.Layer
+COMPARISON:Hydrogel.SD.Outer - Hydrogel.SD.Inner,
+COMP_NAME:Hydrogel_SD_Outer_vs_Hydrogel_SD_Inner,
