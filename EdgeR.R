@@ -158,7 +158,6 @@ parse_input <- function(vector){
 ###############################################################################################
 ###############################  Read-in config ###############################
 
-# configDir = '/Users/upton6/Documents/notebooks/Nanostring/Larisa_Spheroids/DSP_EDA_Protein'
 configDir = opt$configPath
 setwd(configDir)
 config = readLines("EdgeR_Config.txt")
@@ -186,8 +185,7 @@ compNames = parse_input(compNameRaw)
 
 ###############################################################################################
 ###############################  Read-in probe counts ###############################
-# rootDir = opt$rootdir
-rootDir = '/Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/DSP_Protein_Data/'
+rootDir = opt$rootdir
 
 normFile = file.path(rootDir, opt$normpath, opt$file)
 rootDir

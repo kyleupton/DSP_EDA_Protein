@@ -1,6 +1,6 @@
 projectName : 'Adams_Bray'
 rootDir : /Users/upton6/Documents/Nanostring/projects/Adams/
 initialDataPath : Initial Dataset.xlsx
-QCDataPath : Initial QC_2024_04_26.xlsx
+QCDataPath : Default_QC.xlsx
 labWorksheet01Path : Lab_Worksheet_P1001660017100A.txt
 sampleInfoFile : sampleInfo_with_Wells.csv
