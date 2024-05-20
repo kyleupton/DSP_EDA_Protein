@@ -8,10 +8,10 @@
 	"buffers":
 	[
 		{
-			"contents": "",
+			"file": "EdgeR_Config.txt",
 			"settings":
 			{
-				"buffer_size": 0,
+				"buffer_size": 91,
 				"line_ending": "Unix"
 			}
 		}
@@ -108,11 +108,12 @@
 			[
 				{
 					"buffer": 0,
+					"file": "EdgeR_Config.txt",
 					"selected": true,
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 0,
+						"buffer_size": 91,
 						"regions":
 						{
 						},
@@ -212,7 +213,7 @@
 	{
 	},
 	"show_minimap": true,
-	"show_open_files": true,
+	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
 	"side_bar_width": 358.0,
