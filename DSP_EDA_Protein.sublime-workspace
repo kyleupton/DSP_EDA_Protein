@@ -13,7 +13,267 @@
 			{
 				"buffer_size": 91,
 				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					1,
+					1,
+					"revert",
+					null,
+					"AgAAAAAAAAAAAAAAAAAAAAAAAABbAAAAR1JPVVA6QnJvYWRfY2xhc3NpZmljYXRpb24KQ09NUEFSSVNPTjpTZWNvbmRhcnkgLSBQcmltYXJ5LApDT01QX05BTUU6U2Vjb25kYXJ5X3ZzX1ByaW1hcnksCgAAAAAAAAAAWwAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					2,
+					1,
+					"revert",
+					null,
+					"AwAAAAAAAAAAAAAAAAAAAAAAAABbAAAAR1JPVVA6QnJvYWRfY2xhc3NpZmljYXRpb24KQ09NUEFSSVNPTjpTZWNvbmRhcnkgLSBQcmltYXJ5LApDT01QX05BTUU6U2Vjb25kYXJ5X3ZzX1ByaW1hcnksCgAAAAAAAAAAWwAAAAAAAAAAAAAAAAAAAAAAAABbAAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8"
+				]
+			]
+		},
+		{
+			"file": "functions/masterdata.py",
+			"settings":
+			{
+				"buffer_size": 6387,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
 			}
+		},
+		{
+			"file": "functions/plotting.py",
+			"settings":
+			{
+				"buffer_size": 6909,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					1,
+					1,
+					"paste",
+					null,
+					"AQAAAAAAAAAAAAAAmgEAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					9,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AQAAAJoBAAAAAAAAmwEAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACaAQAAAAAAAJoBAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					10,
+					1,
+					"paste",
+					null,
+					"AQAAAJsBAAAAAAAAigoAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACbAQAAAAAAAJsBAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					18,
+					1,
+					"insert",
+					{
+						"characters": "\n\n\n\n\n"
+					},
+					"DgAAAIoKAAAAAAAAiwoAAAAAAAAAAAAAiwoAAAAAAACPCgAAAAAAAAAAAACPCgAAAAAAAJAKAAAAAAAAAAAAAJAKAAAAAAAAlAoAAAAAAAAAAAAAiwoAAAAAAACLCgAAAAAAAAQAAAAgICAgkAoAAAAAAACRCgAAAAAAAAAAAACRCgAAAAAAAJUKAAAAAAAAAAAAAIwKAAAAAAAAjAoAAAAAAAAEAAAAICAgIJEKAAAAAAAAkgoAAAAAAAAAAAAAkgoAAAAAAACWCgAAAAAAAAAAAACNCgAAAAAAAI0KAAAAAAAABAAAACAgICCSCgAAAAAAAJMKAAAAAAAAAAAAAJMKAAAAAAAAlwoAAAAAAAAAAAAAjgoAAAAAAACOCgAAAAAAAAQAAAAgICAg",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACKCgAAAAAAAIoKAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					19,
+					1,
+					"paste",
+					null,
+					"AQAAAJMKAAAAAAAAUQ4AAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACTCgAAAAAAAJMKAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					22,
+					1,
+					"insert",
+					{
+						"characters": "\n\n\n\n"
+					},
+					"CwAAAFEOAAAAAAAAUg4AAAAAAAAAAAAAUg4AAAAAAABWDgAAAAAAAAAAAABWDgAAAAAAAFcOAAAAAAAAAAAAAFcOAAAAAAAAWw4AAAAAAAAAAAAAUg4AAAAAAABSDgAAAAAAAAQAAAAgICAgVw4AAAAAAABYDgAAAAAAAAAAAABYDgAAAAAAAFwOAAAAAAAAAAAAAFMOAAAAAAAAUw4AAAAAAAAEAAAAICAgIFgOAAAAAAAAWQ4AAAAAAAAAAAAAWQ4AAAAAAABdDgAAAAAAAAAAAABUDgAAAAAAAFQOAAAAAAAABAAAACAgICA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABRDgAAAAAAAFEOAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					23,
+					1,
+					"paste",
+					null,
+					"AQAAAFkOAAAAAAAAOxIAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABZDgAAAAAAAFkOAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					24,
+					1,
+					"insert",
+					{
+						"characters": "\n\n\n\n"
+					},
+					"CwAAADsSAAAAAAAAPBIAAAAAAAAAAAAAPBIAAAAAAABAEgAAAAAAAAAAAABAEgAAAAAAAEESAAAAAAAAAAAAAEESAAAAAAAARRIAAAAAAAAAAAAAPBIAAAAAAAA8EgAAAAAAAAQAAAAgICAgQRIAAAAAAABCEgAAAAAAAAAAAABCEgAAAAAAAEYSAAAAAAAAAAAAAD0SAAAAAAAAPRIAAAAAAAAEAAAAICAgIEISAAAAAAAAQxIAAAAAAAAAAAAAQxIAAAAAAABHEgAAAAAAAAAAAAA+EgAAAAAAAD4SAAAAAAAABAAAACAgICA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA7EgAAAAAAADsSAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					25,
+					1,
+					"paste",
+					null,
+					"AQAAAEMSAAAAAAAAchUAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABDEgAAAAAAAEMSAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					29,
+					1,
+					"paste",
+					null,
+					"AQAAAFUOAAAAAAAAihEAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABVDgAAAAAAAFUOAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					30,
+					1,
+					"insert",
+					{
+						"characters": "\n\n\n"
+					},
+					"AwAAAIoRAAAAAAAAixEAAAAAAAAAAAAAixEAAAAAAACMEQAAAAAAAAAAAACMEQAAAAAAAI0RAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACKEQAAAAAAAIoRAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					31,
+					1,
+					"unindent",
+					null,
+					"AQAAAI0RAAAAAAAAjREAAAAAAAAEAAAAICAgIA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACNEQAAAAAAAI0RAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					34,
+					1,
+					"unindent",
+					null,
+					"AQAAAI8KAAAAAAAAjwoAAAAAAAAEAAAAICAgIA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACTCgAAAAAAAJMKAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					52,
+					1,
+					"unindent",
+					null,
+					"AQAAAG8VAAAAAAAAbxUAAAAAAAAEAAAAICAgIA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAABzFQAAAAAAAHMVAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					64,
+					1,
+					"insert",
+					{
+						"characters": "\n\n\n\n"
+					},
+					"BAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAAAAAAAAAAAMAAAAAAAAABAAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+				],
+				[
+					66,
+					1,
+					"paste",
+					null,
+					"AQAAAAEAAAAAAAAAIAAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAA"
+				],
+				[
+					67,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AQAAACAAAAAAAAAAIQAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAgAAAAAAAAACAAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					70,
+					1,
+					"paste",
+					null,
+					"AQAAACMAAAAAAAAAnAEAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAjAAAAAAAAACMAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					71,
+					1,
+					"insert",
+					{
+						"characters": "\n\n"
+					},
+					"AgAAAJwBAAAAAAAAnQEAAAAAAAAAAAAAnQEAAAAAAACeAQAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACcAQAAAAAAAJwBAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					92,
+					1,
+					"paste",
+					null,
+					"AQAAAJ0BAAAAAAAANgIAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAACdAQAAAAAAAJ0BAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					93,
+					1,
+					"insert",
+					{
+						"characters": "\n\n"
+					},
+					"BQAAADYCAAAAAAAANwIAAAAAAAAAAAAANwIAAAAAAABJAgAAAAAAAAAAAABJAgAAAAAAAEoCAAAAAAAAAAAAAEoCAAAAAAAAXAIAAAAAAAAAAAAANwIAAAAAAAA3AgAAAAAAABIAAAAgICAgICAgICAgICAgICAgICA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAA2AgAAAAAAADYCAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					101,
+					1,
+					"paste",
+					null,
+					"AQAAAAAAAAAAAAAAEwAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+				],
+				[
+					112,
+					1,
+					"insert",
+					{
+						"characters": "\n"
+					},
+					"AgAAABMAAAAAAAAAFAAAAAAAAAAAAAAATAIAAAAAAABMAgAAAAAAABIAAAAgICAgICAgICAgICAgICAgICA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAATAAAAAAAAABMAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					113,
+					1,
+					"paste",
+					null,
+					"AQAAABQAAAAAAAAAJgAAAAAAAAAAAAAA",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAUAAAAAAAAABQAAAAAAAAAAAAAAAAA8L8"
+				],
+				[
+					149,
+					1,
+					"paste",
+					null,
+					"AgAAAMoNAAAAAAAA0g0AAAAAAAAAAAAA0g0AAAAAAADSDQAAAAAAAAkAAABIS0dlb01lYW4",
+					"AgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAADKDQAAAAAAANMNAAAAAAAAAAAAAAAA8L8"
+				]
+			]
 		}
 	],
 	"build_system": "",
@@ -46,6 +306,11 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
+	"expanded_folders":
+	[
+		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Adams_Bray/DSP_EDA_Protein",
+		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Adams_Bray/DSP_EDA_Protein/functions"
+	],
 	"file_history":
 	[
 		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Subramaniam_WTA_JCU/DSP_WTA_EDA/functions/plotting.py",
@@ -71,7 +336,7 @@
 	],
 	"find":
 	{
-		"height": 38.0
+		"height": 24.0
 	},
 	"find_in_files":
 	{
@@ -85,6 +350,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"HKGeoMean",
+			"namedColourList",
+			"widgets",
+			"colourList"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -109,7 +378,6 @@
 				{
 					"buffer": 0,
 					"file": "EdgeR_Config.txt",
-					"selected": true,
 					"semi_transient": false,
 					"settings":
 					{
@@ -130,6 +398,69 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "functions/masterdata.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6387,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "functions/plotting.py",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6909,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3306,
+								3306
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 28.0,
+						"translation.y": 1154.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,

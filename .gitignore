@@ -3,6 +3,12 @@
 config.txt
 EdgeR_Config.txt
 
+# Figure and data outputs #
+###########################
+*.png
+*.jpg
+*.csv
+
 # Compiled source #
 ###################
 *.com

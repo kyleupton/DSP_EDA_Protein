@@ -59,7 +59,7 @@ class master_data:
             'Control': 'C',
             'Endogenous': 'E'
         }
-        return self.dataLog1.copy(), self.sampleInfo.copy()
+        return self.data.copy(), self.dataLog1.copy(), self.sampleInfo.copy()
     
     def get_descriptors(self):
         ### Extract descriptions for each sample
@@ -170,4 +170,24 @@ class master_data:
         self.ERCCData = self.ERCCData * (self.ERCCData>0)
         
         return self.ERCCData.copy()
-        
+
+
+
+
+
+
+def read_Surf_Areas(wsPath, indexList, columnList):
+    with open(wsPath, 'r')as f:
+        results = []
+        record = False
+        lines = f.readlines()
+        for line in lines:
+            line=line.strip()
+            if line.startswith('Area '):
+                record = True
+            elif line.startswith('Totals '):
+                record = False
+            elif record:
+                fields = line.split()
+                results.append([int(x) for x in fields[1:]])
+    return(pd.DataFrame(results, index=indexList, columns = columnList))        
