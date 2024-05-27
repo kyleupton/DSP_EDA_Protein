@@ -80,10 +80,10 @@ def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selec
     else:
         sampleInfo, my_cmap, colours = get_colour_mapping(sampleInfo, selectedInfo)
         my_cmap = plt.get_cmap("nipy_spectral")(colours)
-        print('colours')
-        print(colours)
-        print('my_cmap')
-        print(my_cmap)
+        # print('colours')
+        # print(colours)
+        # print('my_cmap')
+        # print(my_cmap)
         for i,j in enumerate(dataSortedRaw.index):
             # y = dataRaw.drop(labels=['mean','probeClass'], axis=1).loc[j]
             y = dataRaw.loc[j]

@@ -13,7 +13,7 @@ class master_data:
         self.values = [[y.value for y in x] for x in self.ws[self.ws.calculate_dimension()]]
 
         self.dropData = False
-        
+        self.threshold = False
         
         ### Convert nested list to a pandas dataFrame and extract expression data with labels
     def get_data(self, fix_zeros=True):
@@ -55,7 +55,6 @@ class master_data:
         self.sampleInfo.rename(index=df.iloc[0:self.targIdx-1,0], columns=colLabels, inplace=True)
         print('sampleInfo.shape')
         print(self.sampleInfo.shape)
-        
         
         print('data.shape')
         print(self.data.shape)
@@ -158,7 +157,7 @@ class master_data:
         return self.dropData.copy()
         
     def ERCC_norm(self):
-        if not self.dropData:
+        if not (self.dropData):
             self.dropData = self.dataLog1
             
         try:
@@ -176,12 +175,21 @@ class master_data:
         self.ERCCData = self.dropData - self.dropData.loc['HYB-POS'] + np.mean(self.dropData.loc['HYB-POS'])
 
         #ToDo: set below threshold values to 0
-        self.ERCCData = self.ERCCData * self.threshold
-        
+        if (self.threshold):
+            self.ERCCData = self.ERCCData * self.threshold
+
+
         #set any negative values following ERCC noirmalisation to 0. These are at or below the limit of detection
-#         zeroFilter = self.ERCCData > 0
-        
-        self.ERCCData = self.ERCCData * (self.ERCCData>0)
+        for x in self.ERCCData.columns:
+            # print(x)
+            for y in self.ERCCData.index:
+                if (self.ERCCData.loc[y,x] < 0.0):
+                    print(x,y)
+                    self.ERCCData.loc[y,x] = 0.0
+
+
+# #         zeroFilter = self.ERCCData > 0
+#         self.ERCCData = self.ERCCData * (self.ERCCData>0)
         
         return self.ERCCData.copy()
 
