@@ -23,34 +23,21 @@ print(' ')
 
 ###############################################################################################
 ###############################  Read-in arguments for DGE run ###############################
-# option_list = list(
-#   make_option(c("-d", "--rootdir"), type="character", default=NULL, 
-#               help="dataset file name", metavar="character"),
-#   make_option(c("-n", "--normpath"), type="character", default='Normalisation/NSNormDropped/', 
-#               help="dataset file name", metavar="character"),
-#   make_option(c("-f", "--file"), type="character", default='NanoStringNorm_49_none_none_low.cv.geo.mean.csv', 
-#               help="dataset file name", metavar="character"),
-#   make_option(c("-e", "--exportdir"), type="character", default="EdgeR", 
-#               help="dataset file name", metavar="character"),
-#   make_option(c("-r", "--runname"), type="character", default="Default", 
-#               help="dataset file name", metavar="character"),
-#   make_option(c("-i", "--sampleinfo"), type="character", default='sampleInfo_with_Wells.csv', 
-#               help="dataset file name", metavar="character")
-# ); 
+
 option_list = list(
-  make_option(c("-c", "--configPath"), type="character", default=NULL, 
+  make_option(c("-c", "--configPath"), type="character", default='/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Adams_Bray/DSP_EDA_Protein', 
               help="dataset file name", metavar="character"),
-  make_option(c("-d", "--rootdir"), type="character", default=NULL, 
+  make_option(c("-d", "--rootdir"), type="character", default='/Users/upton6/Documents/Nanostring/projects/Adams/', 
               help="dataset file name", metavar="character"),
-  make_option(c("-n", "--normpath"), type="character", default=NULL, 
+  make_option(c("-n", "--normpath"), type="character", default='Normalisation/NSNormDropped', 
               help="dataset file name", metavar="character"),
-  make_option(c("-f", "--file"), type="character", default=NULL, 
+  make_option(c("-f", "--file"), type="character", default='NanoStringNorm_49_none_none_low.cv.geo.mean.csv', 
               help="dataset file name", metavar="character"),
-  make_option(c("-e", "--exportdir"), type="character", default=NULL, 
+  make_option(c("-e", "--exportdir"), type="character", default='EdgeR', 
               help="dataset file name", metavar="character"),
-  make_option(c("-r", "--runname"), type="character", default=NULL, 
+  make_option(c("-r", "--runname"), type="character", default='Default', 
               help="dataset file name", metavar="character"),
-  make_option(c("-i", "--sampleinfo"), type="character", default=NULL, 
+  make_option(c("-i", "--sampleinfo"), type="character", default='sampleInfo_with_Wells.csv', 
               help="dataset file name", metavar="character")
 ); 
 opt_parser = OptionParser(option_list=option_list);
@@ -205,15 +192,22 @@ counts <- raw.data[ , c(2:dim(raw.data)[2]) ]
 # head(counts)
 rownames( counts ) <- raw.data[ , 1 ] # gene names
 
+keeps <- c(colnames( counts ))
+
 
 ###############################################################################################
 ###############################  Read-in sample annotations ###############################
 sampleInfo = opt$sampleinfo 
-info <- read.delim(sampleInfo, 
+infoRaw <- read.delim(sampleInfo, 
                       sep=",", 
                       header=TRUE)
-targets <- info[ , c(2:dim(info)[2]) ]
-rownames( targets ) <- info[ , 1 ]
+
+info <- infoRaw[keeps]
+
+
+targets <- info[ , c(1:dim(info)[2]) ]
+info[ , 1 ]
+rownames( targets ) <- infoRaw[ , 1 ]
 targets = as.data.frame(t(targets))
 # targets
 
