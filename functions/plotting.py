@@ -44,30 +44,49 @@ def plot_SA_Hist(surfArea):
 
 
 # Plot log2 transformed raw data before any normalisation
-def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfoExternal, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
+def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
 
     if not (subSelection == None):
         selectedInfo = selectedInfo.loc[subSelection]
     if (type(selectedInfo) == pd.core.series.Series):
         selectedInfo = pd.DataFrame(selectedInfo).T
     
+    # Sort data according to dataSortedRaw
+    dataRaw = dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index)
+    dataRaw = dataRaw[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
+    sampleInfo = sampleInfo[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
+    selectedInfo = selectedInfo[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
+    # print('sampleInfo.columns')
+    # print(sampleInfo.columns)
+    # print('selectedInfo')
+    # print(selectedInfo)
+
     fig, ax = plt.subplots(figsize=(15,8))
     
     if exp:
-        ax.boxplot(np.exp2(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1, sym='-', labels=dataSortedRaw.index)
+        # ax.boxplot(np.exp2(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1, sym='-', labels=dataSortedRaw.index)
+        ax.boxplot(np.exp2(dataRaw.T) -1, sym='-', labels=dataSortedRaw.index)
     else:
-        ax.boxplot(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T, sym='-', labels=dataSortedRaw.index)
+        # ax.boxplot(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T, sym='-', labels=dataSortedRaw.index)
+        ax.boxplot(dataRaw.T, sym='-', labels=dataSortedRaw.index)
 
     if violin:
         if exp:
-            ax.violinplot(np.exp2(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1)
+            # ax.violinplot(np.exp2(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1)
+            ax.violinplot(np.exp2(dataRaw.T) -1)
         else:
-            ax.violinplot(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T)
+            # ax.violinplot(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T)
+            ax.violinplot(dataRaw.T)
     else:
-        sampleInfoExternal, my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
+        sampleInfo, my_cmap, colours = get_colour_mapping(sampleInfo, selectedInfo)
         my_cmap = plt.get_cmap("nipy_spectral")(colours)
+        print('colours')
+        print(colours)
+        print('my_cmap')
+        print(my_cmap)
         for i,j in enumerate(dataSortedRaw.index):
-            y = dataRaw.drop(labels=['mean','probeClass'], axis=1).loc[j]
+            # y = dataRaw.drop(labels=['mean','probeClass'], axis=1).loc[j]
+            y = dataRaw.loc[j]
             y = y
             if exp:
                 y = np.exp2(y.values)-1
@@ -151,6 +170,7 @@ class threshold_probes:
 
 def get_colour_mapping(sampleInfoExternal, selectedInfo):
 
+    # Get parameters of unique combinations for colour mapping space
     comboUniques = []
     comboColourDictRev = {}
     for c in selectedInfo.columns:
@@ -161,11 +181,11 @@ def get_colour_mapping(sampleInfoExternal, selectedInfo):
     comboUniques = sorted(list(set(comboUniques)))
     print('\nNumber of unique combinations: {}'.format(len(comboUniques)))
     # print(comboColourDictRev)
-
     gradient = np.linspace(0, 1, len(comboUniques))
     gradDict = dict(zip(comboUniques,gradient))
     
-    sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
+    # sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
+    # sampleInfoExternal.sort_values(by=list(selectedInfo.index), axis=1, inplace=True)
     # Binding Density plot:
     plt.figure(figsize=(40,10))
     my_cmap = plt.get_cmap("nipy_spectral")
@@ -173,10 +193,11 @@ def get_colour_mapping(sampleInfoExternal, selectedInfo):
     colours = []
     for c in sampleInfoExternal.columns:
         colours.append(gradDict[comboColourDictRev[c]])
-    
-    print('selectedInfo.index')
-    print(list(selectedInfo.index))
-
+    # print('selectedInfo.index')
+    # print(list(selectedInfo.index))
+    # print('selectedInfo.columns')
+    # print(list(selectedInfo.columns))
+    # print()
     return sampleInfoExternal, my_cmap, colours
 
 
@@ -190,6 +211,8 @@ def binding_density_plot(sampleInfoExternal, selectedInfo, subSelection):
         selectedInfo = pd.DataFrame(selectedInfo).T
         
     sampleInfoExternal, my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
+    sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
+    
     fig, ax = plt.subplots(figsize=(20,5))
     
     bar = ax.bar(sampleInfoExternal.columns,

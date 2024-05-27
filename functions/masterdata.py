@@ -16,7 +16,7 @@ class master_data:
         
         
         ### Convert nested list to a pandas dataFrame and extract expression data with labels
-    def get_data(self):
+    def get_data(self, fix_zeros=True):
         df = pd.DataFrame(self.values)
         col3 = df.iloc[:,3].tolist()
         self.targIdx = col3.index('Target name (display name)') + 1
@@ -35,7 +35,22 @@ class master_data:
         self.data = df.iloc[self.targIdx:,4:].astype(np.float32)
         self.data.rename(index=rowLabels,columns=colLabels, inplace=True)
 
-        
+        if fix_zeros:
+            for x in self.data.columns:
+                # print(x)
+                for y in self.data.index:
+                    # print(y)
+                    # Subtract 1 from hyb pos and hyb neg values as we currently don't use RCC files to determine which values have been changed from 0 to 1 for Neg control.
+                    # Canging hyb-pos values may help to ameliorate effects of changing true 1 values to zero, average decrease in hyb neg values.
+                    if (y == 'HYB-NEG'):
+                        self.data.loc[y,x] = self.data.loc[y,x] -1
+                    # elif (y == 'HYB-POS'):
+                    #     self.data.loc[y,x] = self.data.loc[y,x] -1
+                    else:
+                        if (self.data.loc[y,x] == 1):
+                            print(x,y)
+                            self.data.loc[y,x] = 0.0
+
         self.sampleInfo = pd.DataFrame(df.iloc[0:self.targIdx-1,4:])
         self.sampleInfo.rename(index=df.iloc[0:self.targIdx-1,0], columns=colLabels, inplace=True)
         print('sampleInfo.shape')
@@ -48,7 +63,6 @@ class master_data:
         self.dataOrig = self.data.copy()
         # Log transform data for QC and analysis steps
         self.dataLog1 = np.log2(self.data+1)
-        
         
         self.probeClass = df.iloc[self.targIdx:,2]      ### Index needs updating here also
         self.probeClass.rename(index=rowLabels, inplace=True)
