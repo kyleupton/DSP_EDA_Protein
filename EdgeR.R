@@ -206,7 +206,7 @@ info <- infoRaw[keeps]
 
 
 targets <- info[ , c(1:dim(info)[2]) ]
-info[ , 1 ]
+# infoRaw[ , 1 ]
 rownames( targets ) <- infoRaw[ , 1 ]
 targets = as.data.frame(t(targets))
 # targets
