@@ -192,7 +192,11 @@ def get_colour_mapping(sampleInfoExternal, selectedInfo):
     
     colours = []
     for c in sampleInfoExternal.columns:
-        colours.append(gradDict[comboColourDictRev[c]])
+        # When there are only 2 different values the nipy_spectral cmap outputs black and grey. A cmap like rainbow may be better, or here we change the values away from the extremes of the cmap.
+        if len(comboUniques) == 2:
+            colours.append(abs(gradDict[comboColourDictRev[c]] - 0.15))
+        else:
+            colours.append(gradDict[comboColourDictRev[c]])
     # print('selectedInfo.index')
     # print(list(selectedInfo.index))
     # print('selectedInfo.columns')
@@ -212,7 +216,7 @@ def binding_density_plot(sampleInfoExternal, selectedInfo, subSelection):
         
     sampleInfoExternal, my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
     sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
-    
+
     fig, ax = plt.subplots(figsize=(20,5))
     
     bar = ax.bar(sampleInfoExternal.columns,

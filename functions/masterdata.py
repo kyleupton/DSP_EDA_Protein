@@ -110,15 +110,12 @@ class master_data:
         return df.copy(), self.sampleInfo.copy()
 
     def drop_AOIs(self, includes, writeOrig=False):
-        dropAOIs = [x for x in list(self.data.columns) if includes in x]
-        self.dataLog1.drop(labels=dropAOIs, axis=1, inplace=True)
-        
         if writeOrig:
             self.dataOrig = self.dataOrig.drop(labels=dropAOIs, axis=1, inplace=True)
-        
+            
+        dropAOIs = [x for x in list(self.data.columns) if x in includes]
+        self.dataLog1.drop(labels=dropAOIs, axis=1, inplace=True)
         self.sampleInfo = self.sampleInfo.drop(labels=dropAOIs, axis=1)
-        
-        
         return self.dataLog1.copy(), self.sampleInfo.copy()
         
     def set_threshold(self, threshold):
@@ -129,18 +126,18 @@ class master_data:
         # ToDo: Convert threshold data to 0/1 data if needed
         
     
-#     def drop_sample(self):
-#         try:
-#             assert type(labels) == list
-#         except:
-#             print('labels need to be a list')
-#             return False
+    # def drop_sample(self, labels):
+    #     try:
+    #         assert type(labels) == list
+    #     except:
+    #         print('labels need to be a list')
+    #         return False
 
-#         if not self.dropData:
-#             self,.dropData = self.dataLog1
+    #     if not self.dropData:
+    #         self.dropData = self.dataLog1
             
-#         self.dropData.drop((labels=labels, axis=1))
-#         return self.dropData
+    #     self.dropData.drop((labels=labels, axis=1))
+    #     return self.dropData
         
     def drop_probes(self, labels):
         try:
