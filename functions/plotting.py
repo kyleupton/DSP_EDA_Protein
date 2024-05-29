@@ -44,18 +44,19 @@ def plot_SA_Hist(surfArea):
 
 
 # Plot log2 transformed raw data before any normalisation
-def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
+# def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
+def draw_probe_plot(dataRaw, namedColourList, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
 
-    if not (subSelection == None):
+    if not (type(subSelection) == 'NoneType'):
         selectedInfo = selectedInfo.loc[subSelection]
     if (type(selectedInfo) == pd.core.series.Series):
         selectedInfo = pd.DataFrame(selectedInfo).T
     
     # Sort data according to dataSortedRaw
-    dataRaw = dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index)
-    dataRaw = dataRaw[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
-    sampleInfo = sampleInfo[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
-    selectedInfo = selectedInfo[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
+    dataRaw = dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataRaw.index)
+    # dataRaw = dataRaw[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
+    # sampleInfo = sampleInfo[dataRaw.drop(labels=['mean','probeClass'], axis=1).columns]
+    selectedInfo = selectedInfo[dataRaw.columns]
     # print('sampleInfo.columns')
     # print(sampleInfo.columns)
     # print('selectedInfo')
@@ -65,10 +66,10 @@ def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selec
     
     if exp:
         # ax.boxplot(np.exp2(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1, sym='-', labels=dataSortedRaw.index)
-        ax.boxplot(np.exp2(dataRaw.T) -1, sym='-', labels=dataSortedRaw.index)
+        ax.boxplot(np.exp2(dataRaw.T) -1, sym='-', labels=dataRaw.index)
     else:
         # ax.boxplot(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T, sym='-', labels=dataSortedRaw.index)
-        ax.boxplot(dataRaw.T, sym='-', labels=dataSortedRaw.index)
+        ax.boxplot(dataRaw.T, sym='-', labels=dataRaw.index)
 
     if violin:
         if exp:
@@ -84,7 +85,7 @@ def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selec
         # print(colours)
         # print('my_cmap')
         # print(my_cmap)
-        for i,j in enumerate(dataSortedRaw.index):
+        for i,j in enumerate(dataRaw.index):
             # y = dataRaw.drop(labels=['mean','probeClass'], axis=1).loc[j]
             y = dataRaw.loc[j]
             y = y
@@ -97,8 +98,8 @@ def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selec
                 # ax.plot(x[i], y[i], color=my_cmap[i], marker='.', alpha=0.25)
                 ax.plot(x[i], y[i], color=my_cmap[i], marker='.')#
 
-    ax.set_xticks(np.arange(1,len(dataSortedRaw.index)+1,1))
-    ax.set_xlabel=list(dataSortedRaw.index)
+    ax.set_xticks(np.arange(1,len(dataRaw.index)+1,1))
+    ax.set_xlabel=list(dataRaw.index)
     # print(len(np.arange(0,len(dataSortedRaw.index),1)))
     # print(len(list(dataSortedRaw.index)))
     ax.tick_params(axis='x', labelrotation = 90)
@@ -148,8 +149,12 @@ class threshold_probes:
         self.thisHist = plt.hist(self.data.values.flatten(), bins = self.bins)
 
     def zoom_plot(self, start, end):
+
+        maxY = max(self.thisHist[0][2:])*1.2
+        # print(maxY)
         plt.hist(self.data.values.flatten(), bins = self.bins)
-        plt.xlim(0,3)        
+        plt.xlim(start,end)        
+        plt.ylim(0,maxY)        
         
     def check_threshold(self, start, end):
         print(self.thisHist[0][start:end])

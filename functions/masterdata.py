@@ -80,7 +80,6 @@ class master_data:
         surfArea = sampleInfo.loc['AOI surface area']
 
         print(sampleInfo.shape)
-#         sampleInfo
         
     def add_class_mean(self, df):
         ## Add column to data with mean values for each probe (row)
@@ -110,12 +109,22 @@ class master_data:
         return df.copy(), self.sampleInfo.copy()
 
     def drop_AOIs(self, includes, writeOrig=False):
+
+        dropAOIs = [x for x in list(self.data.columns) if (x in includes)]
+        print(dropAOIs)
         if writeOrig:
             self.dataOrig = self.dataOrig.drop(labels=dropAOIs, axis=1, inplace=True)
-            
-        dropAOIs = [x for x in list(self.data.columns) if x in includes]
+
+        # print(self.dataLog1.shape)
         self.dataLog1.drop(labels=dropAOIs, axis=1, inplace=True)
-        self.sampleInfo = self.sampleInfo.drop(labels=dropAOIs, axis=1)
+        # print(self.dataLog1.shape)
+
+        try:
+            self.ERCCData.drop(labels=dropAOIs, axis=1, inplace=True)
+        except:
+            pass
+
+        self.sampleInfo.drop(labels=dropAOIs, axis=1, inplace=True)
         return self.dataLog1.copy(), self.sampleInfo.copy()
         
     def set_threshold(self, threshold):
@@ -124,20 +133,6 @@ class master_data:
         
         # ToDo: Check that all values in master data are also included in threshold dataFrame
         # ToDo: Convert threshold data to 0/1 data if needed
-        
-    
-    # def drop_sample(self, labels):
-    #     try:
-    #         assert type(labels) == list
-    #     except:
-    #         print('labels need to be a list')
-    #         return False
-
-    #     if not self.dropData:
-    #         self.dropData = self.dataLog1
-            
-    #     self.dropData.drop((labels=labels, axis=1))
-    #     return self.dropData
         
     def drop_probes(self, labels):
         try:
@@ -154,42 +149,37 @@ class master_data:
         return self.dropData.copy()
         
     def ERCC_norm(self):
-        if not (self.dropData):
-            self.dropData = self.dataLog1
+        self.ERCCData = self.dataLog1
             
         try:
-            self.dropData = self.dropData.drop(labels=['mean'], axis=1)
+            self.ERCCData = self.ERCCData.drop(labels=['mean'], axis=1)
         except:
             pass
         try:
-            self.dropData = self.dropData.drop(labels=['probeClass'], axis=1)
+            self.ERCCData = self.ERCCData.drop(labels=['probeClass'], axis=1)
         except:
             pass
-            
             
         # ERCC normalisation. 
         # Divide by individual HYB-POS values, then scale data using the geometric mean of all HYB-POS values. subtract in log space is same as divide in normal space. Add in log space is same as multiply in normal space
-        self.ERCCData = self.dropData - self.dropData.loc['HYB-POS'] + np.mean(self.dropData.loc['HYB-POS'])
+        self.ERCCData = self.ERCCData - self.ERCCData.loc['HYB-POS'] + np.mean(self.ERCCData.loc['HYB-POS'])
 
-        #ToDo: set below threshold values to 0
-        if (self.threshold):
-            self.ERCCData = self.ERCCData * self.threshold
-
+        # #ToDo: set below threshold values to 0
+        # if (self.threshold):
+        #     self.ERCCData = self.ERCCData * self.threshold
 
         #set any negative values following ERCC noirmalisation to 0. These are at or below the limit of detection
         for x in self.ERCCData.columns:
             # print(x)
             for y in self.ERCCData.index:
                 if (self.ERCCData.loc[y,x] < 0.0):
-                    print(x,y)
+                    # print(x,y)
                     self.ERCCData.loc[y,x] = 0.0
-
 
 # #         zeroFilter = self.ERCCData > 0
 #         self.ERCCData = self.ERCCData * (self.ERCCData>0)
         
         return self.ERCCData.copy()
-
 
 
 
