@@ -147,6 +147,12 @@ class threshold_probes:
         self.data = data.drop(labels=['mean','probeClass'], axis=1)
         self.bins = bins
         self.thisHist = plt.hist(self.data.values.flatten(), bins = self.bins)
+        # print(self.thisHist)
+        plt.title('Thresholding plot')
+        plt.xlabel('Probe value (log2 transformed)')
+        plt.ylabel('Count')
+        # self.thisHist.xlabel = 
+        # self.thisHist.ylabel = 
 
     def zoom_plot(self, start, end):
 
@@ -155,6 +161,9 @@ class threshold_probes:
         plt.hist(self.data.values.flatten(), bins = self.bins)
         plt.xlim(start,end)        
         plt.ylim(0,maxY)        
+        plt.title('Thresholding Zoom plot')
+        plt.xlabel('Probe value (log2 transformed)')
+        plt.ylabel('Count')
         
     def check_threshold(self, start, end):
         print(self.thisHist[0][start:end])
