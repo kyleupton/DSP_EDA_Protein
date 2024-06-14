@@ -1,3 +1,0 @@
-GROUP:Broad_classification
-COMPARISON:Secondary - Primary,
-COMP_NAME:Secondary_vs_Primary,
