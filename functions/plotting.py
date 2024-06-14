@@ -45,7 +45,7 @@ def plot_SA_Hist(surfArea):
 
 # Plot log2 transformed raw data before any normalisation
 # def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
-def draw_probe_plot(dataRaw, namedColourList, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
+def draw_probe_plot(dataRaw, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
 
     if not (type(subSelection) == 'NoneType'):
         selectedInfo = selectedInfo.loc[subSelection]
