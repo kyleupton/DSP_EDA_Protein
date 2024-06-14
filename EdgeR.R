@@ -23,21 +23,34 @@ print(' ')
 
 ###############################################################################################
 ###############################  Read-in arguments for DGE run ###############################
-
+# option_list = list(
+#   make_option(c("-d", "--rootdir"), type="character", default=NULL, 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-n", "--normpath"), type="character", default='Normalisation/NSNormDropped/', 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-f", "--file"), type="character", default='NanoStringNorm_49_none_none_low.cv.geo.mean.csv', 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-e", "--exportdir"), type="character", default="EdgeR", 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-r", "--runname"), type="character", default="Default", 
+#               help="dataset file name", metavar="character"),
+#   make_option(c("-i", "--sampleinfo"), type="character", default='sampleInfo_with_Wells.csv', 
+#               help="dataset file name", metavar="character")
+# ); 
 option_list = list(
-  make_option(c("-c", "--configPath"), type="character", default='/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Adams_Bray/DSP_EDA_Protein', 
+  make_option(c("-c", "--configPath"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-d", "--rootdir"), type="character", default='/Users/upton6/Documents/Nanostring/projects/Adams/', 
+  make_option(c("-d", "--rootdir"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-n", "--normpath"), type="character", default='Normalisation/NSNormDropped', 
+  make_option(c("-n", "--normpath"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-f", "--file"), type="character", default='NanoStringNorm_49_none_none_low.cv.geo.mean.csv', 
+  make_option(c("-f", "--file"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-e", "--exportdir"), type="character", default='EdgeR', 
+  make_option(c("-e", "--exportdir"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-r", "--runname"), type="character", default='Default', 
+  make_option(c("-r", "--runname"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
-  make_option(c("-i", "--sampleinfo"), type="character", default='sampleInfo_with_Wells.csv', 
+  make_option(c("-i", "--sampleinfo"), type="character", default=NULL, 
               help="dataset file name", metavar="character")
 ); 
 opt_parser = OptionParser(option_list=option_list);
@@ -54,18 +67,18 @@ setup_y <- function(counts,group){
   return(y)
 }
 
-plot_First <- function(y){
+plot_First <- function(y, runname){
   #### Plot first sample
-  pdf( paste("plotMD_", opt$runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
+  pdf( paste("plotMD_", runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
   plotMD(cpm(y, log=TRUE), column=2)
   abline(h=0, col="red", lty=2, lwd=2)
   dev.off()
 }
 
-plot_MDS <- function(y, group){
+plot_MDS <- function(y, group, runname){
   #### Plot Multi Dimensional Scaling
   #### Points and Colours need work
-  pdf( paste("MDS_Plot_", opt$runname, ".pdf", sep = "") , width = 8 , height = 8 ) # in inches
+  pdf( paste("MDS_Plot_", runname, ".pdf", sep = "") , width = 8 , height = 8 ) # in inches
   # points <- c(0,1,2,3,4,7,8)
   points <- rep(c(0,1,2,3,4,7,8,9,10,11,15,16,17,18,19,20,21),2)
   # colors <- c("blue", "blue", "blue", "blue", "blue", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "red", "red", "red", "red", "red")
@@ -81,8 +94,8 @@ make_Design <- function(group){
   return(design)
 }
 
-make_Disp <- function(y, design){
-  pdf( paste(opt$runname, "_plotBCV.pdf", sep = "") , width = 4 , height = 4 ) # in inches
+make_Disp <- function(y, design, runname){
+  pdf( paste(runname, "_plotBCV.pdf", sep = "") , width = 4 , height = 4 ) # in inches
   y <- estimateDisp(y, design, robust=TRUE)
   y$common.dispersion
   plotBCV(y)
@@ -90,8 +103,8 @@ make_Disp <- function(y, design){
   return(y)
 }
 
-make_Fit <- function(y, design){
-  pdf( paste(opt$runname, "_plotQLDisp.pdf", sep = "") , width = 4 , height = 4 ) # in inches
+make_Fit <- function(y, design, runname){
+  pdf( paste(runname, "_plotQLDisp.pdf", sep = "") , width = 4 , height = 4 ) # in inches
   fit <- glmQLFit(y, design, robust=TRUE)
   head(fit$coefficients)
   plotQLDisp(fit)
@@ -145,6 +158,7 @@ parse_input <- function(vector){
 ###############################################################################################
 ###############################  Read-in config ###############################
 
+# configDir = '/Users/upton6/Documents/notebooks/Nanostring/Larisa_Spheroids/DSP_EDA_Protein'
 configDir = opt$configPath
 setwd(configDir)
 config = readLines("EdgeR_Config.txt")
@@ -172,7 +186,8 @@ compNames = parse_input(compNameRaw)
 
 ###############################################################################################
 ###############################  Read-in probe counts ###############################
-rootDir = opt$rootdir
+# rootDir = opt$rootdir
+rootDir = '/Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/DSP_Protein_Data/'
 
 normFile = file.path(rootDir, opt$normpath, opt$file)
 rootDir
@@ -192,22 +207,15 @@ counts <- raw.data[ , c(2:dim(raw.data)[2]) ]
 # head(counts)
 rownames( counts ) <- raw.data[ , 1 ] # gene names
 
-keeps <- c(colnames( counts ))
-
 
 ###############################################################################################
 ###############################  Read-in sample annotations ###############################
 sampleInfo = opt$sampleinfo 
-infoRaw <- read.delim(sampleInfo, 
+info <- read.delim(sampleInfo, 
                       sep=",", 
                       header=TRUE)
-
-info <- infoRaw[keeps]
-
-
-targets <- info[ , c(1:dim(info)[2]) ]
-# infoRaw[ , 1 ]
-rownames( targets ) <- infoRaw[ , 1 ]
+targets <- info[ , c(2:dim(info)[2]) ]
+rownames( targets ) <- info[ , 1 ]
 targets = as.data.frame(t(targets))
 # targets
 
@@ -221,7 +229,15 @@ setwd(exportDir)
 
 groups
 for (g in seq_along(groups)){
-  # print(groups[g][[1]])
+  print("groups[g][[1]]")
+  print(groups[g][[1]])
+  runname = paste(groups[g][[1]], collapse = '', sep="_")
+  print(runname)
+  exportDir = file.path(rootDir, opt$exportdir, runname) 
+  dir.create(exportDir, showWarnings = FALSE)
+  setwd(exportDir)
+
+    
   test2 <- mapply(function(x,y) targets[x][,y], groups[g][[1]], 1)
   group = vector()
   for (x in suppressWarnings(1:range(dim(test2)[1]))){
@@ -229,13 +245,13 @@ for (g in seq_along(groups)){
   }
   group <- factor(group)
   y <- setup_y(counts,group)
-  plot_First(y)
-  plot_MDS(y,group)
+  plot_First(y, runname)
+  plot_MDS(y,group, runname)
   
   #### Is this the best design set-up? Double check the use of 0 vs other options
   design <- make_Design(group)
-  y <- make_Disp(y, design)
-  fit <- make_Fit(y, design)
+  y <- make_Disp(y, design, runname)
+  fit <- make_Fit(y, design, runname)
   
   
   ###############################################################################################
