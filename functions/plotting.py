@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -242,3 +243,87 @@ def binding_density_plot(sampleInfoExternal, selectedInfo, subSelection):
     plt.show()
 
 # ToDo: Add legend
+
+def volcanoPlot(dataPath, file):
+    sigGenes = []
+    data = pd.read_csv(os.path.join(dataPath,file), index_col = 0)
+
+    colours = ['r' if (abs(data.loc[x, 'logFC'])>1 and data.loc[x, 'FDR']<0.05)  else 'c' if data.loc[x, 'FDR']<0.05 else 'k' for x in data.index ]
+
+    plt.scatter(data['logFC'],np.log(data['FDR'])*-1, c=colours)
+
+    plt.xlabel('log2 Fold Change')
+    plt.ylabel('-log10 FDR')
+    plt.axhline(-np.log(0.05))
+    plt.axvline(np.log2(2), c='r', dashes=[5,3])
+    plt.axvline(-np.log2(2), c='r', dashes=[5,3])
+#     plt.title(dataPath.split('/')[-1].split('.')[0])
+    plt.title(file.split('.')[0])
+#     plt.title(fileNameLookup[file])
+
+    for gene in data.index:
+        if (data.loc[gene,'FDR'] < 0.05):
+            sigGenes.append(gene)
+            
+            
+            # if abs(data.loc[gene,'logFC'])>1:
+
+            label = gene
+
+            plt.annotate(label, # this is the text
+                         (data.loc[gene,'logFC'],-np.log(data.loc[gene,'FDR'])), # these are the coordinates to position the label
+                         textcoords="offset points", # how to position the text
+                         xytext=(0,10), # distance from text to points (x,y)
+                         ha='left') # horizontal alignment can be left, right or center
+
+                
+    outfile = file.split('.')[0] + '.png'   
+    print(outfile)
+    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='png')
+    outfile = file.split('.')[0] + '.svg'   
+    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='svg')
+    plt.show()
+    return(sigGenes)
+
+
+
+def volcanoPlotpVal(dataPath, file):
+    sigGenes = []
+    data = pd.read_csv(os.path.join(dataPath,file), index_col = 0)
+
+    colours = ['r' if (abs(data.loc[x, 'logFC'])>1 and data.loc[x, 'PValue']<0.05)  else 'c' if data.loc[x, 'PValue']<0.05 else 'k' for x in data.index ]
+
+    plt.scatter(data['logFC'],np.log(data['PValue'])*-1, c=colours)
+
+    plt.xlabel('log2 Fold Change')
+    plt.ylabel('-log10 PValue')
+    plt.axhline(-np.log(0.05))
+    plt.axvline(np.log2(2), c='r', dashes=[5,3])
+    plt.axvline(-np.log2(2), c='r', dashes=[5,3])
+#     plt.title(dataPath.split('/')[-1].split('.')[0])
+    plt.title(file.split('.')[0])
+#     plt.title(fileNameLookup[file])
+
+    for gene in data.index:
+        if (data.loc[gene,'PValue'] < 0.05):
+            sigGenes.append(gene)
+            
+            
+            # if abs(data.loc[gene,'logFC'])>1:
+
+            label = gene
+
+            plt.annotate(label, # this is the text
+                         (data.loc[gene,'logFC'],-np.log(data.loc[gene,'PValue'])), # these are the coordinates to position the label
+                         textcoords="offset points", # how to position the text
+                         xytext=(0,10), # distance from text to points (x,y)
+                         ha='left') # horizontal alignment can be left, right or center
+
+                
+    outfile = file.split('.')[0] + '_pVal.png'   
+#     print(outfile)
+    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='png')
+    outfile = file.split('.')[0] + '_pVal.svg'   
+    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='svg')
+    plt.show()
+    return(sigGenes)
