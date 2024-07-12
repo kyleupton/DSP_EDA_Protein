@@ -67,18 +67,18 @@ setup_y <- function(counts,group){
   return(y)
 }
 
-plot_First <- function(y){
+plot_First <- function(y, runname){
   #### Plot first sample
-  pdf( paste("plotMD_", opt$runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
+  pdf( paste("plotMD_", runname, ".pdf", sep = "") , width = 4 , height = 4 ) # in inches
   plotMD(cpm(y, log=TRUE), column=2)
   abline(h=0, col="red", lty=2, lwd=2)
   dev.off()
 }
 
-plot_MDS <- function(y, group){
+plot_MDS <- function(y, group, runname){
   #### Plot Multi Dimensional Scaling
   #### Points and Colours need work
-  pdf( paste("MDS_Plot_", opt$runname, ".pdf", sep = "") , width = 8 , height = 8 ) # in inches
+  pdf( paste("MDS_Plot_", runname, ".pdf", sep = "") , width = 8 , height = 8 ) # in inches
   # points <- c(0,1,2,3,4,7,8)
   points <- rep(c(0,1,2,3,4,7,8,9,10,11,15,16,17,18,19,20,21),2)
   # colors <- c("blue", "blue", "blue", "blue", "blue", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "darkgreen", "red", "red", "red", "red", "red")
@@ -94,8 +94,8 @@ make_Design <- function(group){
   return(design)
 }
 
-make_Disp <- function(y, design){
-  pdf( paste(opt$runname, "_plotBCV.pdf", sep = "") , width = 4 , height = 4 ) # in inches
+make_Disp <- function(y, design, runname){
+  pdf( paste(runname, "_plotBCV.pdf", sep = "") , width = 4 , height = 4 ) # in inches
   y <- estimateDisp(y, design, robust=TRUE)
   y$common.dispersion
   plotBCV(y)
@@ -103,8 +103,8 @@ make_Disp <- function(y, design){
   return(y)
 }
 
-make_Fit <- function(y, design){
-  pdf( paste(opt$runname, "_plotQLDisp.pdf", sep = "") , width = 4 , height = 4 ) # in inches
+make_Fit <- function(y, design, runname){
+  pdf( paste(runname, "_plotQLDisp.pdf", sep = "") , width = 4 , height = 4 ) # in inches
   fit <- glmQLFit(y, design, robust=TRUE)
   head(fit$coefficients)
   plotQLDisp(fit)
@@ -138,8 +138,10 @@ get_Results_TR <- function(fit, con, pdfName){
 print_Results <- function(qlf, y, filename){
   resultsbyP <- topTags(qlf, n = nrow(qlf$table))$table
   resultsbyP
-  wh.rows.glm <- match( rownames( resultsbyP ) , rownames( y$counts ) )
-  results2.tbl <- cbind (resultsbyP, "Tgw.Disp"=y$tagwise.dispersion[wh.rows.glm], "UpDown" = decideTestsDGE(qlf)[wh.rows.glm,], y$counts[wh.rows.glm,] )
+  # wh.rows.glm <- match( rownames( resultsbyP ) , rownames( y$counts ) )
+  wh.rows.glm <- match( rownames( resultsbyP ) , rownames( qlf[["fitted.values"]] ) )
+  # results2.tbl <- cbind (resultsbyP, "Tgw.Disp"=y$tagwise.dispersion[wh.rows.glm], "UpDown" = decideTestsDGE(qlf)[wh.rows.glm,], y$counts[wh.rows.glm,] )
+  results2.tbl <- cbind (resultsbyP, "Tgw.Disp"=y$tagwise.dispersion[wh.rows.glm], "UpDown" = decideTestsDGE(qlf)[wh.rows.glm,], qlf[["fitted.values"]] )
   # head (results2.tbl)
   write.table(results2.tbl, file = filename, sep = ",", row.names = TRUE)
 }
@@ -158,6 +160,7 @@ parse_input <- function(vector){
 ###############################################################################################
 ###############################  Read-in config ###############################
 
+# configDir = '/Users/upton6/Documents/notebooks/Nanostring/Larisa_Spheroids/DSP_EDA_Protein'
 configDir = opt$configPath
 setwd(configDir)
 config = readLines("EdgeR_Config.txt")
@@ -186,6 +189,7 @@ compNames = parse_input(compNameRaw)
 ###############################################################################################
 ###############################  Read-in probe counts ###############################
 rootDir = opt$rootdir
+# rootDir = '/Users/upton6/Documents/Nanostring/projects/Larisa/2312_Run/DSP_Protein_Data/'
 
 normFile = file.path(rootDir, opt$normpath, opt$file)
 rootDir
@@ -201,8 +205,11 @@ raw.data <- read.table(file = normFile,
 # head( raw.data )
 # dim(raw.data)
 counts <- raw.data[ , c(2:dim(raw.data)[2]) ]
+# reverse log2 transform
+head(counts)
+# counts <- 2^counts
 # dim(counts)
-# head(counts)
+head(counts)
 rownames( counts ) <- raw.data[ , 1 ] # gene names
 
 
@@ -227,7 +234,15 @@ setwd(exportDir)
 
 groups
 for (g in seq_along(groups)){
-  # print(groups[g][[1]])
+  print("groups[g][[1]]")
+  print(groups[g][[1]])
+  runname = paste(groups[g][[1]], collapse = '', sep="_")
+  print(runname)
+  exportDir = file.path(rootDir, opt$exportdir, runname) 
+  dir.create(exportDir, showWarnings = FALSE)
+  setwd(exportDir)
+
+    
   test2 <- mapply(function(x,y) targets[x][,y], groups[g][[1]], 1)
   group = vector()
   for (x in suppressWarnings(1:range(dim(test2)[1]))){
@@ -235,13 +250,13 @@ for (g in seq_along(groups)){
   }
   group <- factor(group)
   y <- setup_y(counts,group)
-  plot_First(y)
-  plot_MDS(y,group)
+  plot_First(y, runname)
+  plot_MDS(y,group, runname)
   
   #### Is this the best design set-up? Double check the use of 0 vs other options
   design <- make_Design(group)
-  y <- make_Disp(y, design)
-  fit <- make_Fit(y, design)
+  y <- make_Disp(y, design, runname)
+  fit <- make_Fit(y, design, runname)
   
   
   ###############################################################################################
