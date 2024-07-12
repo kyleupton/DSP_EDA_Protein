@@ -7,94 +7,6 @@
 	},
 	"buffers":
 	[
-		{
-			"file": "functions/masterdata.py",
-			"settings":
-			{
-				"buffer_size": 7865,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "Rscript ../DSP_EDA_Protein/EdgeR.R \n-c /Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Prasadam_TMA \n-d /Users/upton6/Documents/Nanostring/projects/Indira/DSP_Output_Files/ \n-n Normalisation/NSNorm \n-f NanoStringNorm_52_none_mean_low.cv.geo.mean.csv \n-e EdgeR/NSNorm_52 \n-i sampleInfo_with_Wells.csv",
-			"settings":
-			{
-				"buffer_size": 359,
-				"line_ending": "Unix",
-				"name": "Rscript ../DSP_EDA_Protein/EdgeR.R"
-			},
-			"undo_stack":
-			[
-				[
-					1,
-					1,
-					"paste",
-					null,
-					"AQAAAAAAAAAAAAAAYQEAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwvw"
-				],
-				[
-					4,
-					1,
-					"insert",
-					{
-						"characters": "\n"
-					},
-					"AQAAACMAAAAAAAAAJAAAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAACMAAAAAAAAAIwAAAAAAAAAAAAAAAADwvw"
-				],
-				[
-					7,
-					1,
-					"insert",
-					{
-						"characters": "\n"
-					},
-					"AQAAAOgAAAAAAAAA6QAAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAOgAAAAAAAAA6AAAAAAAAAAAAAAAAADwvw"
-				],
-				[
-					10,
-					1,
-					"insert",
-					{
-						"characters": "\n"
-					},
-					"AQAAAKAAAAAAAAAAoQAAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAKAAAAAAAAAAoAAAAAAAAAAAAAAAAADwvw"
-				],
-				[
-					13,
-					1,
-					"insert",
-					{
-						"characters": "\n"
-					},
-					"AQAAADUBAAAAAAAANgEAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAADUBAAAAAAAANQEAAAAAAAAAAAAAAADwvw"
-				],
-				[
-					16,
-					1,
-					"insert",
-					{
-						"characters": "\n"
-					},
-					"AQAAAEkBAAAAAAAASgEAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAEkBAAAAAAAASQEAAAAAAAAAAAAAAADwvw"
-				],
-				[
-					42,
-					1,
-					"insert",
-					{
-						"characters": "\n"
-					},
-					"AQAAAAIBAAAAAAAAAwEAAAAAAAAAAAAA",
-					"AwAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPC/AAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8L8AAAAAAQAAAAIBAAAAAAAAAgEAAAAAAAAAAAAAAADwvw"
-				]
-			]
-		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -126,13 +38,10 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
-	"expanded_folders":
-	[
-		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/DSP_EDA_Protein"
-	],
 	"file_history":
 	[
 		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/DSP_EDA_Protein/functions/plotting.py",
+		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/DSP_EDA_Protein/functions/masterdata.py",
 		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/DSP_EDA_Protein/EdgeR_Config.txt",
 		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Subramaniam_WTA_JCU/DSP_WTA_EDA/functions/plotting.py",
 		"/Users/upton6/Library/CloudStorage/OneDrive-QueenslandUniversityofTechnology/Documents/notebooks/Nanostring/Subramaniam_WTA_JCU/DSP_WTA_EDA/functions/__init__.py",
@@ -157,7 +66,7 @@
 	],
 	"find":
 	{
-		"height": 38.0
+		"height": 24.0
 	},
 	"find_in_files":
 	{
@@ -171,11 +80,6 @@
 		"case_sensitive": false,
 		"find_history":
 		[
-			"dataRaw",
-			"HKGeoMean",
-			"namedColourList",
-			"widgets",
-			"colourList"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -197,67 +101,6 @@
 		{
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "functions/masterdata.py",
-					"selected": true,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7865,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"stack_multiselect": false,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 359,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								259,
-								259
-							]
-						],
-						"settings":
-						{
-							"auto_name": "Rscript ../DSP_EDA_Protein/EdgeR.R",
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"stack_multiselect": false,
-					"type": "text"
-				}
 			]
 		}
 	],
@@ -297,7 +140,7 @@
 		"height": 0.0
 	},
 	"pinned_build_system": "",
-	"project": "DSP_EDA_Protein.sublime-project",
+	"project": "plotting.sublime-project",
 	"replace":
 	{
 		"height": 44.0
@@ -338,7 +181,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 148.0,
+	"side_bar_width": 358.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

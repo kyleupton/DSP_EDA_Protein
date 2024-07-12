@@ -45,8 +45,7 @@ def plot_SA_Hist(surfArea):
 
 
 # Plot log2 transformed raw data before any normalisation
-# def draw_probe_plot_2(dataRaw, dataSortedRaw, namedColourList, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
-def draw_probe_plot(dataRaw, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
+def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
 
     if not (type(subSelection) == 'NoneType'):
         selectedInfo = selectedInfo.loc[subSelection]
@@ -54,10 +53,11 @@ def draw_probe_plot(dataRaw, sampleInfo, selectedInfo, subSelection=None, title=
         selectedInfo = pd.DataFrame(selectedInfo).T
     
     # Sort data according to dataSortedRaw
-    dataRaw = dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataRaw.index)
-    # dataRaw = dataRaw[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
-    # sampleInfo = sampleInfo[dataRaw.drop(labels=['mean','probeClass'], axis=1).columns]
-    selectedInfo = selectedInfo[dataRaw.columns]
+    probeData = probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=probeData.index)
+    sampleInfo = sampleInfo.loc[:,probeData.columns]
+    # probeData = probeData[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
+    # sampleInfo = sampleInfo[probeData.drop(labels=['mean','probeClass'], axis=1).columns]
+    selectedInfo = selectedInfo[probeData.columns]
     # print('sampleInfo.columns')
     # print(sampleInfo.columns)
     # print('selectedInfo')
@@ -66,19 +66,19 @@ def draw_probe_plot(dataRaw, sampleInfo, selectedInfo, subSelection=None, title=
     fig, ax = plt.subplots(figsize=(15,8))
     
     if exp:
-        # ax.boxplot(np.exp2(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1, sym='-', labels=dataSortedRaw.index)
-        ax.boxplot(np.exp2(dataRaw.T) -1, sym='-', labels=dataRaw.index)
+        # ax.boxplot(np.exp2(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1, sym='-', labels=dataSortedRaw.index)
+        ax.boxplot(np.exp2(probeData.T) -1, sym='-', labels=probeData.index)
     else:
-        # ax.boxplot(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T, sym='-', labels=dataSortedRaw.index)
-        ax.boxplot(dataRaw.T, sym='-', labels=dataRaw.index)
+        # ax.boxplot(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T, sym='-', labels=dataSortedRaw.index)
+        ax.boxplot(probeData.T, sym='-', labels=probeData.index)
 
     if violin:
         if exp:
-            # ax.violinplot(np.exp2(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1)
-            ax.violinplot(np.exp2(dataRaw.T) -1)
+            # ax.violinplot(np.exp2(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1)
+            ax.violinplot(np.exp2(probeData.T) -1)
         else:
-            # ax.violinplot(dataRaw.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T)
-            ax.violinplot(dataRaw.T)
+            # ax.violinplot(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T)
+            ax.violinplot(probeData.T)
     else:
         sampleInfo, my_cmap, colours = get_colour_mapping(sampleInfo, selectedInfo)
         my_cmap = plt.get_cmap("nipy_spectral")(colours)
@@ -86,9 +86,9 @@ def draw_probe_plot(dataRaw, sampleInfo, selectedInfo, subSelection=None, title=
         # print(colours)
         # print('my_cmap')
         # print(my_cmap)
-        for i,j in enumerate(dataRaw.index):
-            # y = dataRaw.drop(labels=['mean','probeClass'], axis=1).loc[j]
-            y = dataRaw.loc[j]
+        for i,j in enumerate(probeData.index):
+            # y = probeData.drop(labels=['mean','probeClass'], axis=1).loc[j]
+            y = probeData.loc[j]
             y = y
             if exp:
                 y = np.exp2(y.values)-1
@@ -99,8 +99,8 @@ def draw_probe_plot(dataRaw, sampleInfo, selectedInfo, subSelection=None, title=
                 # ax.plot(x[i], y[i], color=my_cmap[i], marker='.', alpha=0.25)
                 ax.plot(x[i], y[i], color=my_cmap[i], marker='.')#
 
-    ax.set_xticks(np.arange(1,len(dataRaw.index)+1,1))
-    ax.set_xlabel=list(dataRaw.index)
+    ax.set_xticks(np.arange(1,len(probeData.index)+1,1))
+    ax.set_xlabel=list(probeData.index)
     # print(len(np.arange(0,len(dataSortedRaw.index),1)))
     # print(len(list(dataSortedRaw.index)))
     ax.tick_params(axis='x', labelrotation = 90)
@@ -229,8 +229,8 @@ def binding_density_plot(sampleInfoExternal, selectedInfo, subSelection):
     if (type(selectedInfo) == pd.core.series.Series):
         selectedInfo = pd.DataFrame(selectedInfo).T
         
-    sampleInfoExternal, my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
     sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
+    sampleInfoExternal, my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
 
     fig, ax = plt.subplots(figsize=(20,5))
     
@@ -244,86 +244,45 @@ def binding_density_plot(sampleInfoExternal, selectedInfo, subSelection):
 
 # ToDo: Add legend
 
-def volcanoPlot(dataPath, file):
+def volcanoPlot(dataPath, file, pVal=True, plot=True):
+    if pVal:
+        sigType = 'PValue'
+    else:
+        sigType = 'FDR'
+
     sigGenes = []
     data = pd.read_csv(os.path.join(dataPath,file), index_col = 0)
 
-    colours = ['r' if (abs(data.loc[x, 'logFC'])>1 and data.loc[x, 'FDR']<0.05)  else 'c' if data.loc[x, 'FDR']<0.05 else 'k' for x in data.index ]
+    colours = ['r' if (abs(data.loc[x, 'logFC'])>1 and data.loc[x, sigType]<0.05)  else 'c' if data.loc[x, sigType]<0.05 else 'k' for x in data.index ]
+    # plt.scatter(data['logFC'],np.log(data[sigType])*-1, c=colours)
+    
+    if plot:
+        plt.scatter(data['logFC'],np.log(data[sigType])*-1, c=data['logFC'], cmap='coolwarm', vmin = -max(abs(data['logFC'])), vmax = max(abs(data['logFC'])))
+        plt.ylabel('-log10 ' + sigType)
 
-    plt.scatter(data['logFC'],np.log(data['FDR'])*-1, c=colours)
-
-    plt.xlabel('log2 Fold Change')
-    plt.ylabel('-log10 FDR')
-    plt.axhline(-np.log(0.05))
-    plt.axvline(np.log2(2), c='r', dashes=[5,3])
-    plt.axvline(-np.log2(2), c='r', dashes=[5,3])
-#     plt.title(dataPath.split('/')[-1].split('.')[0])
-    plt.title(file.split('.')[0])
-#     plt.title(fileNameLookup[file])
-
-    for gene in data.index:
-        if (data.loc[gene,'FDR'] < 0.05):
-            sigGenes.append(gene)
-            
-            
-            # if abs(data.loc[gene,'logFC'])>1:
-
-            label = gene
-
-            plt.annotate(label, # this is the text
-                         (data.loc[gene,'logFC'],-np.log(data.loc[gene,'FDR'])), # these are the coordinates to position the label
-                         textcoords="offset points", # how to position the text
-                         xytext=(0,10), # distance from text to points (x,y)
-                         ha='left') # horizontal alignment can be left, right or center
-
-                
-    outfile = file.split('.')[0] + '.png'   
-    print(outfile)
-    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='png')
-    outfile = file.split('.')[0] + '.svg'   
-    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='svg')
-    plt.show()
-    return(sigGenes)
-
-
-
-def volcanoPlotpVal(dataPath, file):
-    sigGenes = []
-    data = pd.read_csv(os.path.join(dataPath,file), index_col = 0)
-
-    colours = ['r' if (abs(data.loc[x, 'logFC'])>1 and data.loc[x, 'PValue']<0.05)  else 'c' if data.loc[x, 'PValue']<0.05 else 'k' for x in data.index ]
-
-    plt.scatter(data['logFC'],np.log(data['PValue'])*-1, c=colours)
-
-    plt.xlabel('log2 Fold Change')
-    plt.ylabel('-log10 PValue')
-    plt.axhline(-np.log(0.05))
-    plt.axvline(np.log2(2), c='r', dashes=[5,3])
-    plt.axvline(-np.log2(2), c='r', dashes=[5,3])
-#     plt.title(dataPath.split('/')[-1].split('.')[0])
-    plt.title(file.split('.')[0])
-#     plt.title(fileNameLookup[file])
+        plt.xlabel('log2 Fold Change')
+        plt.axhline(-np.log(0.05))
+        plt.axvline(np.log2(2), c='r', dashes=[5,3])
+        plt.axvline(-np.log2(2), c='r', dashes=[5,3])
+        plt.title(file.split('.')[0][file.rfind('/')+1:]) # Use path and extension trimmed file name as figure title
 
     for gene in data.index:
-        if (data.loc[gene,'PValue'] < 0.05):
+        if (data.loc[gene,sigType] < 0.05):
             sigGenes.append(gene)
-            
-            
-            # if abs(data.loc[gene,'logFC'])>1:
-
             label = gene
-
-            plt.annotate(label, # this is the text
-                         (data.loc[gene,'logFC'],-np.log(data.loc[gene,'PValue'])), # these are the coordinates to position the label
-                         textcoords="offset points", # how to position the text
-                         xytext=(0,10), # distance from text to points (x,y)
-                         ha='left') # horizontal alignment can be left, right or center
-
+            if plot:
+                plt.annotate(label, # this is the text
+                             (data.loc[gene,'logFC'],-np.log(data.loc[gene,sigType])), # these are the coordinates to position the label
+                             textcoords="offset points", # how to position the text
+                             xytext=(0,10), # distance from text to points (x,y)
+                             ha='left') # horizontal alignment can be left, right or center
                 
-    outfile = file.split('.')[0] + '_pVal.png'   
-#     print(outfile)
-    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='png')
-    outfile = file.split('.')[0] + '_pVal.svg'   
-    plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='svg')
-    plt.show()
+    if plot:
+        outfile = file.split('.')[0] + '.png'   
+        print(outfile)
+        plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='png')
+        outfile = file.split('.')[0] + '.svg'   
+        plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='svg')
+        plt.show()
     return(sigGenes)
+    
