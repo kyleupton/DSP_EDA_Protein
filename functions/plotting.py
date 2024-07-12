@@ -23,30 +23,19 @@ namedColourList = ['#377eb8', '#ff7f00', '#4daf4a',
                   '#999999', '#e41a1c', '#dede00']
 
 
-
 def plot_SA_Hist(surfArea):
-    
-        
     fig, ax = plt.subplots(figsize=(10,5))
     ax.hist(surfArea, bins=50)
-
-
     ax.set_xlabel('AOI Surface Area µm', fontdict=labelFont)
     ax.set_ylabel('Count', fontdict=labelFont)
     ax.set_title('AOI Surface Area distribution', fontdict=titleFont)
-
-    print('Min SA')
-    print(min(surfArea))
-
-    print('Max SA')
-    print(max(surfArea))
-    
+    print(f'Min SA : {min(surfArea)}')
+    print(f'Max SA : {max(surfArea)}')
     return(fig)
 
 
 # Plot log2 transformed raw data before any normalisation
 def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
-
     if not (type(subSelection) == 'NoneType'):
         selectedInfo = selectedInfo.loc[subSelection]
     if (type(selectedInfo) == pd.core.series.Series):
@@ -55,39 +44,23 @@ def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, titl
     # Sort data according to dataSortedRaw
     probeData = probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=probeData.index)
     sampleInfo = sampleInfo.loc[:,probeData.columns]
-    # probeData = probeData[dataSortedRaw.drop(labels=['mean','probeClass'], axis=1).columns]
-    # sampleInfo = sampleInfo[probeData.drop(labels=['mean','probeClass'], axis=1).columns]
     selectedInfo = selectedInfo[probeData.columns]
-    # print('sampleInfo.columns')
-    # print(sampleInfo.columns)
-    # print('selectedInfo')
-    # print(selectedInfo)
 
     fig, ax = plt.subplots(figsize=(15,8))
-    
     if exp:
-        # ax.boxplot(np.exp2(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1, sym='-', labels=dataSortedRaw.index)
         ax.boxplot(np.exp2(probeData.T) -1, sym='-', labels=probeData.index)
     else:
-        # ax.boxplot(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T, sym='-', labels=dataSortedRaw.index)
         ax.boxplot(probeData.T, sym='-', labels=probeData.index)
 
     if violin:
         if exp:
-            # ax.violinplot(np.exp2(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T) -1)
             ax.violinplot(np.exp2(probeData.T) -1)
         else:
-            # ax.violinplot(probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=dataSortedRaw.index).T)
             ax.violinplot(probeData.T)
     else:
         sampleInfo, my_cmap, colours = get_colour_mapping(sampleInfo, selectedInfo)
         my_cmap = plt.get_cmap("nipy_spectral")(colours)
-        # print('colours')
-        # print(colours)
-        # print('my_cmap')
-        # print(my_cmap)
         for i,j in enumerate(probeData.index):
-            # y = probeData.drop(labels=['mean','probeClass'], axis=1).loc[j]
             y = probeData.loc[j]
             y = y
             if exp:
@@ -96,13 +69,10 @@ def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, titl
                 y = y.values
             x = np.random.normal(i+1, 0.1, len(y))
             for i in range(len(x)): 
-                # ax.plot(x[i], y[i], color=my_cmap[i], marker='.', alpha=0.25)
                 ax.plot(x[i], y[i], color=my_cmap[i], marker='.')#
 
     ax.set_xticks(np.arange(1,len(probeData.index)+1,1))
     ax.set_xlabel=list(probeData.index)
-    # print(len(np.arange(0,len(dataSortedRaw.index),1)))
-    # print(len(list(dataSortedRaw.index)))
     ax.tick_params(axis='x', labelrotation = 90)
 
     if exp:
@@ -113,10 +83,7 @@ def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, titl
         ax.set_title(title + ' (Log2 transformed)', size=36)
         ax.set_ylabel('Log2 probe value', size=24)
 #     plt.show()
-    
     return(fig)
-
-
 
 
 def probe_GeoMean_Plots(plotData, title=''):
@@ -141,24 +108,17 @@ def probe_GeoMean_Plots(plotData, title=''):
     fig.tight_layout()
 
 
-
 class threshold_probes:
     def __init__(self, data, bins):
-        
         self.data = data.drop(labels=['mean','probeClass'], axis=1)
         self.bins = bins
         self.thisHist = plt.hist(self.data.values.flatten(), bins = self.bins)
-        # print(self.thisHist)
         plt.title('Thresholding plot')
         plt.xlabel('Probe value (log2 transformed)')
         plt.ylabel('Count')
-        # self.thisHist.xlabel = 
-        # self.thisHist.ylabel = 
 
     def zoom_plot(self, start, end):
-
         maxY = max(self.thisHist[0][2:])*1.2
-        # print(maxY)
         plt.hist(self.data.values.flatten(), bins = self.bins)
         plt.xlim(start,end)        
         plt.ylim(0,maxY)        
@@ -167,13 +127,12 @@ class threshold_probes:
         plt.ylabel('Count')
         
     def check_threshold(self, start, end):
-        print(self.thisHist[0][start:end])
-        print(self.thisHist[1][start:end])
+        print(f'Histogram[0] range : \t{self.thisHist[0][start:end]}')
+        print(f'Histogram[1] range : \tself.thisHist[1][start:end]}')
 
     def set_threshold_idx(self, idx):
-        print(self.thisHist[0][idx])
-        print(self.thisHist[1][idx])
-        
+        print(f'Histogram[0][idx] value : \t{self.thisHist[0][idx]}')
+        print(f'Histogram[1][idx] value : \t{self.thisHist[1][idx]}')
         self.threshold_idx = idx
         self.threshold = self.thisHist[1][idx]
 

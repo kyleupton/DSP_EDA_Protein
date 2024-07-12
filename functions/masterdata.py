@@ -48,16 +48,16 @@ class master_data:
                     #     self.data.loc[y,x] = self.data.loc[y,x] -1
                     else:
                         if (self.data.loc[y,x] == 1):
-                            print(x,y)
+                            # print(x,y)
                             self.data.loc[y,x] = 0.0
 
         self.sampleInfo = pd.DataFrame(df.iloc[0:self.targIdx-1,4:])
         self.sampleInfo.rename(index=df.iloc[0:self.targIdx-1,0], columns=colLabels, inplace=True)
-        print('sampleInfo.shape')
-        print(self.sampleInfo.shape)
+        # print('sampleInfo.shape')
+        # print(self.sampleInfo.shape)
         
-        print('data.shape')
-        print(self.data.shape)
+        # print('data.shape')
+        # print(self.data.shape)
 
         self.dataOrig = self.data.copy()
         # Log transform data for QC and analysis steps
@@ -79,7 +79,7 @@ class master_data:
         nuclei = sampleInfo.loc['AOI nuclei count']
         surfArea = sampleInfo.loc['AOI surface area']
 
-        print(sampleInfo.shape)
+        # print(sampleInfo.shape)
         
     def add_class_mean(self, df):
         ## Add column to data with mean values for each probe (row)
@@ -111,7 +111,7 @@ class master_data:
     def drop_AOIs(self, includes, writeOrig=False):
 
         dropAOIs = [x for x in list(self.data.columns) if (x in includes)]
-        print(dropAOIs)
+        # print(dropAOIs)
         if writeOrig:
             self.dataOrig = self.dataOrig.drop(labels=dropAOIs, axis=1, inplace=True)
 
