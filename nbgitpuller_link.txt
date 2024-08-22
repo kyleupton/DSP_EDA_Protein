@@ -1,0 +1,1 @@
+https://jupyterhub.eres.qut.edu.au/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fkyleupton%2FDSP_EDA_Protein&urlpath=tree%2FDSP_EDA_Protein%2F&branch=main

@@ -1,8 +1,11 @@
 import os
+import sklearn
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.cluster.hierarchy import dendrogram
 
 titleFont = {'fontsize': 32}
 # ,
@@ -35,7 +38,7 @@ def plot_SA_Hist(surfArea):
 
 
 # Plot log2 transformed raw data before any normalisation
-def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False):
+def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False, savefig=False):
     if not (type(subSelection) == 'NoneType'):
         selectedInfo = selectedInfo.loc[subSelection]
     if (type(selectedInfo) == pd.core.series.Series):
@@ -58,7 +61,7 @@ def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, titl
         else:
             ax.violinplot(probeData.T)
     else:
-        sampleInfo, my_cmap, colours = get_colour_mapping(sampleInfo, selectedInfo)
+        my_cmap, colours = get_colour_mapping(sampleInfo, selectedInfo)
         my_cmap = plt.get_cmap("nipy_spectral")(colours)
         for i,j in enumerate(probeData.index):
             y = probeData.loc[j]
@@ -84,6 +87,10 @@ def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, titl
         ax.set_ylabel('Log2 probe value', size=24)
 #     plt.show()
     return(fig)
+
+    if not (savefig==False):
+        plt.savefig(savefig, dpi='figure', format='svg')
+
 
 
 def probe_GeoMean_Plots(plotData, title=''):
@@ -121,18 +128,25 @@ class threshold_probes:
         maxY = max(self.thisHist[0][2:])*1.2
         plt.hist(self.data.values.flatten(), bins = self.bins)
         plt.xlim(start,end)        
-        plt.ylim(0,maxY)        
+        plt.ylim(0,maxY)
+        plt.axvline(self.threshold, c='red')     
         plt.title('Thresholding Zoom plot')
         plt.xlabel('Probe value (log2 transformed)')
         plt.ylabel('Count')
         
     def check_threshold(self, start, end):
-        print(f'Histogram[0] range : \t{self.thisHist[0][start:end]}')
-        print(f'Histogram[1] range : \tself.thisHist[1][start:end]}')
+        print(f'Histogram[0] range :\t{self.thisHist[0][start:end]}')
+        print(f'Histogram[1] range :\t{self.thisHist[1][start:end]}')
+        # print(f'Threshold index :\t%d'%(idx))
+        # print(f'Threshold count :\t%d'%(self.thisHist[0][idx]))
+        # print(f'Threshold point :\t%6.3f'%(self.thisHist[1][idx]))
 
     def set_threshold_idx(self, idx):
-        print(f'Histogram[0][idx] value : \t{self.thisHist[0][idx]}')
-        print(f'Histogram[1][idx] value : \t{self.thisHist[1][idx]}')
+        # print(f'Histogram[0][idx] value :\t{self.thisHist[0][idx]}')
+        # print(f'Histogram[1][idx] value :\t{self.thisHist[1][idx]}')
+        print(f'Threshold index :\t%d'%(idx))
+        print(f'Threshold count :\t%d'%(self.thisHist[0][idx]))
+        print(f'Threshold point :\t%6.3f'%(self.thisHist[1][idx]))
         self.threshold_idx = idx
         self.threshold = self.thisHist[1][idx]
 
@@ -141,17 +155,22 @@ class threshold_probes:
         return(self.ETfilter)
 
 
-
 def get_colour_mapping(sampleInfoExternal, selectedInfo):
-
     # Get parameters of unique combinations for colour mapping space
     comboUniques = []
     comboColourDictRev = {}
-    for c in selectedInfo.columns:
-        thisCol = selectedInfo[c]
-        combined = '_'.join(thisCol.values)
-        comboUniques.append(combined)
-        comboColourDictRev[c] = combined
+
+    if (type(selectedInfo) == pd.core.series.Series):
+        for k,v in selectedInfo.items():
+            comboUniques.append(v)
+            comboColourDictRev[k] = v
+    else:
+        for c in selectedInfo.columns:
+            thisCol = selectedInfo[c]
+            combined = '_'.join(thisCol.values)
+            comboUniques.append(combined)
+            comboColourDictRev[c] = combined
+
     comboUniques = sorted(list(set(comboUniques)))
     print('\nNumber of unique combinations: {}'.format(len(comboUniques)))
     # print(comboColourDictRev)
@@ -161,7 +180,7 @@ def get_colour_mapping(sampleInfoExternal, selectedInfo):
     # sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
     # sampleInfoExternal.sort_values(by=list(selectedInfo.index), axis=1, inplace=True)
     # Binding Density plot:
-    plt.figure(figsize=(40,10))
+    # plt.figure(figsize=(40,10))
     my_cmap = plt.get_cmap("nipy_spectral")
     
     colours = []
@@ -176,7 +195,7 @@ def get_colour_mapping(sampleInfoExternal, selectedInfo):
     # print('selectedInfo.columns')
     # print(list(selectedInfo.columns))
     # print()
-    return sampleInfoExternal, my_cmap, colours
+    return my_cmap, colours
 
 
 
@@ -189,7 +208,7 @@ def binding_density_plot(sampleInfoExternal, selectedInfo, subSelection):
         selectedInfo = pd.DataFrame(selectedInfo).T
         
     sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
-    sampleInfoExternal, my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
+    my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
 
     fig, ax = plt.subplots(figsize=(20,5))
     
@@ -245,3 +264,46 @@ def volcanoPlot(dataPath, file, pVal=True, plot=True):
         plt.show()
     return(sigGenes)
     
+
+def plot_dendrogram(model, **kwargs):
+    # create the counts of samples under each node
+    counts = np.zeros(model.children_.shape[0])
+    n_samples = len(model.labels_)
+    for i, merge in enumerate(model.children_):
+        current_count = 0
+        for child_idx in merge:
+            if child_idx < n_samples:
+                current_count += 1  # leaf node
+            else:
+                current_count += counts[child_idx - n_samples]
+        counts[i] = current_count
+        
+    # Create linkage matrix and then plot the dendrogram
+    linkage_matrix = np.column_stack(
+        [model.children_, model.distances_, counts]
+    ).astype(float)
+    # Plot the corresponding dendrogram
+    dendro = dendrogram(linkage_matrix, **kwargs)
+    return(dendro['ivl'])
+
+
+def get_factor_colours(AOINames, factors, varLookup, sampleInfo):
+    colourArray = []
+    AOINames = [x.replace(' ','.') for x in AOINames]
+    for f in factors:
+        tempVarNames = sampleInfo.loc[f,AOINames].values
+        colours = [varLookup[x] for x in tempVarNames]
+        colourArray.append(colours)
+    return(colourArray)
+    
+
+def get_connectivity(data, T=False):
+    if T==True:
+        cosineDistance = 1 - sklearn.metrics.pairwise.cosine_distances(data.T)
+    else:
+        cosineDistance = 1 - sklearn.metrics.pairwise.cosine_distances(data)
+    knnCosine = sklearn.neighbors.kneighbors_graph(cosineDistance,2)
+    return(knnCosine)
+    
+    
+

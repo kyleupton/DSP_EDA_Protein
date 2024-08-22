@@ -137,7 +137,7 @@ get_Results_TR <- function(fit, con, pdfName){
 
 print_Results <- function(qlf, y, filename){
   resultsbyP <- topTags(qlf, n = nrow(qlf$table))$table
-  resultsbyP
+  # resultsbyP
   # wh.rows.glm <- match( rownames( resultsbyP ) , rownames( y$counts ) )
   wh.rows.glm <- match( rownames( resultsbyP ) , rownames( qlf[["fitted.values"]] ) )
   # results2.tbl <- cbind (resultsbyP, "Tgw.Disp"=y$tagwise.dispersion[wh.rows.glm], "UpDown" = decideTestsDGE(qlf)[wh.rows.glm,], y$counts[wh.rows.glm,] )
@@ -206,10 +206,10 @@ raw.data <- read.table(file = normFile,
 # dim(raw.data)
 counts <- raw.data[ , c(2:dim(raw.data)[2]) ]
 # reverse log2 transform
-head(counts)
+# head(counts)
 # counts <- 2^counts
 # dim(counts)
-head(counts)
+# head(counts)
 rownames( counts ) <- raw.data[ , 1 ] # gene names
 
 

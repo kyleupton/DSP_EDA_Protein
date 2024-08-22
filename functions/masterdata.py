@@ -1,8 +1,9 @@
+import time
 from openpyxl import load_workbook
 import numpy as np
 import pandas as pd
 from copy import copy# as copy
-
+from IPython.display import clear_output
 
 class master_data:
     def __init__(self, dataPath):
@@ -16,7 +17,7 @@ class master_data:
         self.threshold = False
         
         ### Convert nested list to a pandas dataFrame and extract expression data with labels
-    def get_data(self, fix_zeros=True):
+    def get_data(self, fix_zeros=True, clean_names=True):
         df = pd.DataFrame(self.values)
         col3 = df.iloc[:,3].tolist()
         self.targIdx = col3.index('Target name (display name)') + 1
@@ -58,6 +59,14 @@ class master_data:
         
         # print('data.shape')
         # print(self.data.shape)
+
+        if clean_names:
+            removeChars = [' ','#','$','.',',','(',')','-','__','__','__','__']
+            for r in removeChars:
+                self.data.columns = [x.replace(r,'_') for x in self.data.columns]
+                self.data.columns = ['X'+x if x[0] in ['0','1','2','3','4','5','6','7','8','9'] else x for x in self.data.columns]
+                self.sampleInfo.columns = [x.replace(r,'_') for x in self.sampleInfo.columns]
+
 
         self.dataOrig = self.data.copy()
         # Log transform data for QC and analysis steps
@@ -200,3 +209,186 @@ def read_Surf_Areas(wsPath, indexList, columnList):
                 fields = line.split()
                 results.append([int(x) for x in fields[1:]])
     return(pd.DataFrame(results, index=indexList, columns = columnList))        
+
+
+
+def make_locate_list(sampleInfo, AOItoWellDict):
+    toLocate = []
+    for smpl in sampleInfo.columns:
+        # print(smpl)
+        if not (smpl in AOItoWellDict.keys()):
+
+
+            if smpl.endswith('Full_ROI'):
+                smplIdx = -3
+            else:
+                smplIdx = -2
+            prev = smpl.split('_')[smplIdx]
+
+            # prev = smpl.split('_')[-2]
+            # if (prev == 'Full'):
+            #     prev = smpl.split('_')[-3]
+
+            # print(prev)
+
+
+            prv2 =  "{:03d}".format(int(prev)-2)
+            prv  =  "{:03d}".format(int(prev)-1)
+            nxt  =  "{:03d}".format(int(prev)+1)
+            nxt2 =  "{:03d}".format(int(prev)+2)
+            prv2 = '_'.join(smpl.split('_')[:smplIdx]) + '_' + prv2
+            prv  = '_'.join(smpl.split('_')[:smplIdx]) + '_' + prv
+            nxt  = '_'.join(smpl.split('_')[:smplIdx]) + '_' + nxt
+            nxt2 = '_'.join(smpl.split('_')[:smplIdx]) + '_' + nxt2
+            prvSamples = [x for x in sampleInfo.columns if ((prv in x) or (prv2 in x))]
+            nxtSamples = [x for x in sampleInfo.columns if ((nxt in x) or (nxt2 in x))]
+            toLocate.append([smpl, prvSamples, nxtSamples])
+    # print(toLocate)
+    # print('len(toLocate)')
+    # print(len(toLocate))
+    return(toLocate)
+
+
+# ToDo : Print plate hints for each well?
+# ToDo : Sort samples better for display?
+# ToDo : Update dataframes also
+# ToDo : Confirm entries with y/n input
+
+# ToDo : Find a more pythonic way to make this code interactive
+# ToDo : Fix use of global variables
+
+def enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs):
+
+    ##ToDo: Need an option to leave input blank to skip sample
+
+    # global AOItoPlateDict
+    # global AOItoWellDict
+    # global PlateWellDict
+    for t in toLocate:
+        plate = ''
+        well = ''
+        # print()
+        # print(f'Unlocated well :\t{t[0]}\n')
+        # print(t[1])
+        # print(t[2])
+        if (not((t[1] == []) and (t[2] == []))):
+
+            ## Confirm that well has not been located already in a prior run
+            try:
+                hasPlate = AOItoPlateDict[t[0]]
+            except KeyError:
+                hasPlate = False
+            try:
+                hasWell = AOItoWellDict[t[0]]
+            except KeyError:
+                hasWell = False
+            if (hasPlate or hasWell):
+                print('has entry')
+                time.sleep(1)
+                continue
+            print('previous:')
+            for p in sorted(t[1]):
+                try:
+                    print('\t\t\t' + p + '\t: ' + str(AOItoPlateDict[p]) + ' ' + AOItoWellDict[p])
+                except KeyError:
+                    print('\t\t\t' + p + '\t: not in dict')
+
+            print()
+            print(f'Unlocated well :\t{t[0]}\n')
+
+            print('next:')
+            for n in sorted(t[2]):
+                try:
+                    print('\t\t\t' + n + '\t: ' + str(AOItoPlateDict[n]) + ' ' + AOItoWellDict[n])
+                except KeyError:
+                    print('\t\t\t' + n + '\t: not in dict')
+            plate = (input('enter plate for this sample, or press enter to pass'))
+
+            if (plate == ''):
+                clear_output(wait=False)
+                continue
+            else:
+                try:
+                    plate = int(plate)
+                except ValueError:
+                    print('plate value must be an integer')
+                    time.sleep(2)
+                    clear_output(wait=False)
+                    continue
+
+
+
+            well = input('enter well for this sample').upper()
+            if (well == ''):
+                clear_output(wait=False)
+                continue
+            clear_output(wait=False)
+            print('you entered:')
+            print(plate)
+            print(well)
+            if well in validWells:
+                print('\nWell is valid\n\n')
+                if (well in PlateWellDict[plate]):
+                    print('well already has entry')
+                    time.sleep(2)
+                else:
+                    PlateWellDict[plate].append(well)
+                    AOItoWellDict[t[0]] = well
+                    AOItoPlateDict[t[0]] = plate
+                    ##### Also add to dataframes
+                    wellDFs[plate-1].loc[well[0],well[1:]] = t[0]
+        
+            else:
+                print('invalid well entered')
+                pass
+    return (AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs)        
+    # ToDo: Confirm that all entries appear correct (Surface Areas match)
+
+def read_plate_info(masterData, infoPath):
+    masterData.sampleInfo = pd.read_csv(infoPath, index_col=0)
+    sampleInfo = masterData.sampleInfo
+    return (sampleInfo)
+
+
+## read in paths from config file
+def readConfig():
+    configDict = {
+        'rootDir': '',
+        'initialDataPath' : '',
+        'QCDataPath' : '',
+        'labWorksheet01Path':'',
+        'projectName':'',
+        'selectedData':[]
+    }
+    
+    with open('config.txt','r') as f:
+        lines = f.readlines()
+        for line in lines:
+            if ((not line.startswith('#')) and (not line.strip()=='')):
+                line = line.strip()
+                fields = line.split(':')
+                print(f'{fields[0]} : {fields[1]}')
+                if fields[0].strip()=='initialDataPath':
+                    configDict[fields[0].strip()] = fields[1].strip().strip('\'')
+                elif fields[0].strip()=='probeThresholdIdx':
+                    configDict[fields[0].strip()] = int(fields[1].strip().strip('\''))
+                elif fields[0].strip()=='selectedData':
+                    tempList = fields[1].strip().strip('\'').split(',')
+                    tempList = [x.strip() for x in tempList]
+                    tempList = [x for x in tempList if not x=='']
+                    configDict['selectedData'] = tempList
+                else:
+                    configDict[fields[0].strip()] = fields[1].strip().strip('\'')
+    ## ToDo: Add checks to ensure that minimal fields have been populated. Raise errors or warnings
+    return configDict
+
+
+def getUniqueCombos(selectedInfo):
+    comboUniques = []
+    for c in selectedInfo.columns:
+        thisCol = selectedInfo[c]
+        combined = '_'.join(thisCol.values)
+        comboUniques.append(combined)
+    comboUniques = sorted(list(set(comboUniques)))
+    print('\nNumber of unique combinations: {}'.format(len(comboUniques)))
+    return comboUniques
