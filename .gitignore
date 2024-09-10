@@ -41,6 +41,7 @@ localhelpers
 *.sql
 *.sqlite
 *checkpoint.ipynb
+.ipynb_checkpoints
 
 # OS generated files #
 ######################

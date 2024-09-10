@@ -1,9 +1,12 @@
 import time
+import os
 from openpyxl import load_workbook
 import numpy as np
 import pandas as pd
 from copy import copy# as copy
 from IPython.display import clear_output
+import itertools as itertools
+from collections import Counter as cnt
 
 class master_data:
     def __init__(self, dataPath):
@@ -61,11 +64,12 @@ class master_data:
         # print(self.data.shape)
 
         if clean_names:
-            removeChars = [' ','#','$','.',',','(',')','-','__','__','__','__']
+            removeChars = [' ','#','$','.',',','(',')','-','/','\\','__','__','__','__']
             for r in removeChars:
                 self.data.columns = [x.replace(r,'_') for x in self.data.columns]
                 self.data.columns = ['X'+x if x[0] in ['0','1','2','3','4','5','6','7','8','9'] else x for x in self.data.columns]
                 self.sampleInfo.columns = [x.replace(r,'_') for x in self.sampleInfo.columns]
+                self.sampleInfo.columns = ['X'+x if x[0] in ['0','1','2','3','4','5','6','7','8','9'] else x for x in self.sampleInfo.columns]
 
 
         self.dataOrig = self.data.copy()
@@ -191,8 +195,84 @@ class master_data:
         return self.ERCCData.copy()
 
 
+def check_plate_info(sampleInfo):
+    # Check Well, Row, Plate, Col fields in in sampleInfo
+    # Number of values should be less than number of samples if info has not been added.
+    if (sampleInfo.loc[['Well','Row','Col','Plate']].isnull().any().any()):
+        return False
+    else:
+        return(True)
+# ToDo : create function to check if all wells in a plate match by surface area
 
 
+def infer_plate_info(sampleInfo, rootDir, wsFiles):
+    # global sampleInfo
+    # global configDict
+    
+    sampleInfo.loc['AOI surface area'] = [round(x) for x in sampleInfo.loc['AOI surface area']]
+    indexList = list(map(chr, range(ord('A'), ord('H')+1)))
+    columnList = [str(n).zfill(2) for n in range(1,13)]
+    validWells = []
+    for i in indexList:
+        for c in columnList:
+            validWells.append(i+c)
+    wsList = []
+    wellDFs = [] # Set up empty dataframe to be populated with sample names
+    for x in wsFiles:
+        wsList.append(read_Surf_Areas(os.path.join(rootDir, x.strip()), indexList, columnList))
+        
+        wellDFs.append(pd.DataFrame(data='', index = indexList, columns = columnList))
+
+    wsAreaList = []
+    allArea = []
+    for i, ws in enumerate(wsList):
+        wsAreaList.append(list(wsList[i].values.flatten()))
+        allArea.extend(wsAreaList[i])
+    
+    
+    collect = cnt(allArea)
+    unique = [int(k) for k in collect.keys() if collect[k] ==1]
+    nonUnique = [int(k) for k in collect.keys() if collect[k] !=1]
+    
+    
+    plates = (wsList[0],)
+    SAWellDict = {}
+    SAPlateDict = {}
+    AOItoWellDict = {}
+    AOItoPlateDict = {}
+    PlateWellDict = {1:[],2:[]} 
+    for i, plate in enumerate(wsList):
+        for col in plate.columns:
+            for row in plate.index:
+                val = int(plate.loc[row,col])
+                if val in unique:
+                    SAWellDict[val] = row + col
+                    possibleMatches = sampleInfo.loc[:,sampleInfo.T['AOI surface area'] == val].columns 
+                    if len (possibleMatches == 1):
+                        wellDFs[i].loc[row,col] = possibleMatches[0]
+                        AOItoWellDict[possibleMatches[0]] = row + col
+                    else:
+                        print('possibleMatches')
+                        print(possibleMatches)
+                        pass
+                    if val in wsAreaList[i]:
+                        SAPlateDict[val] = 1
+                        PlateWellDict[i+1].append(row+col)
+                        AOItoPlateDict[possibleMatches[0]] = i+1
+    
+    toLocate = make_locate_list(sampleInfo, AOItoWellDict)
+    
+    AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs = enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs)
+    
+    AOIWell = pd.DataFrame(data = AOItoWellDict.values(), columns = ['Well'], index = AOItoWellDict.keys()).T
+    AOIRow = pd.DataFrame(data = [x[0] for x in AOItoWellDict.values()], columns = ['Row'], index = AOItoWellDict.keys()).T
+    AOICol = pd.DataFrame(data = [x[1:] for x in AOItoWellDict.values()], columns = ['Col'], index = AOItoWellDict.keys()).T
+    AOIPlate = pd.DataFrame(data = AOItoPlateDict.values(), columns = ['Plate'], index = AOItoPlateDict.keys()).T
+    plateInfo = pd.concat([AOIWell, AOIRow, AOICol, AOIPlate])
+    sampleInfo = pd.concat([sampleInfo, plateInfo])
+
+    return(sampleInfo) 
+    
 
 def read_Surf_Areas(wsPath, indexList, columnList):
     with open(wsPath, 'r')as f:
@@ -209,7 +289,6 @@ def read_Surf_Areas(wsPath, indexList, columnList):
                 fields = line.split()
                 results.append([int(x) for x in fields[1:]])
     return(pd.DataFrame(results, index=indexList, columns = columnList))        
-
 
 
 def make_locate_list(sampleInfo, AOItoWellDict):
@@ -344,6 +423,7 @@ def enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, PlateWe
     return (AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs)        
     # ToDo: Confirm that all entries appear correct (Surface Areas match)
 
+
 def read_plate_info(masterData, infoPath):
     masterData.sampleInfo = pd.read_csv(infoPath, index_col=0)
     sampleInfo = masterData.sampleInfo
@@ -392,3 +472,5 @@ def getUniqueCombos(selectedInfo):
     comboUniques = sorted(list(set(comboUniques)))
     print('\nNumber of unique combinations: {}'.format(len(comboUniques)))
     return comboUniques
+
+
