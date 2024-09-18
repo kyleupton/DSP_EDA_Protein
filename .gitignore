@@ -1,7 +1,6 @@
 # Project Specific Files #
 ##########################
 projects*
-config.txt
 EdgeR_Config.txt
 EdgeR_Studio.R
 localhelpers
