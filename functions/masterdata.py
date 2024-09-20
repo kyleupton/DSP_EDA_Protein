@@ -225,14 +225,39 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
 
     wsAreaList = []
     allArea = []
+    
+    print('wsList')
+    print(wsList)
+    print(len(wsList))
+    
     for i, ws in enumerate(wsList):
         wsAreaList.append(list(wsList[i].values.flatten()))
         allArea.extend(wsAreaList[i])
     
+    print(allArea)
+    
+    allArea = [k for k in allArea if not np.isnan(k)]
     
     collect = cnt(allArea)
+    print(collect)
+    
+    # collect = [k for k in collect if not np.isnan(k)]
+    
+    
+    
+    print(collect)
+    
     unique = [int(k) for k in collect.keys() if collect[k] ==1]
     nonUnique = [int(k) for k in collect.keys() if collect[k] !=1]
+    
+    
+#     unique = [k for k in collect if collect[k] ==1]
+#     unique = [k for k in unique if not np.isnan(k)]
+#     unique = [int(k) for k in unique]    
+    
+#     nonUnique = [k for k in collect.keys() if collect[k] !=1]
+#     nonUnique = [k for k in unique if not np.isnan(k)]
+#     nonUnique = [int(k) for k in unique]
     
     
     plates = (wsList[0],)
@@ -243,9 +268,17 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
     PlateWellDict = {1:[],2:[]} 
     for i, plate in enumerate(wsList):
         for col in plate.columns:
+            print(col)
             for row in plate.index:
-                val = int(plate.loc[row,col])
-                if val in unique:
+                print(row)
+                # val = int(plate.loc[row,col])
+                val = plate.loc[row,col]
+                if np.isnan(val):
+                    val = 0
+                    continue
+                val = int(val)
+
+                if ((not val==0) and (val in unique)):
                     SAWellDict[val] = row + col
                     possibleMatches = sampleInfo.loc[:,sampleInfo.T['AOI surface area'] == val].columns 
                     if len (possibleMatches == 1):
@@ -254,8 +287,10 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
                     else:
                         print('possibleMatches')
                         print(possibleMatches)
-                        pass
+                        print(val)
+                        continue
                     if val in wsAreaList[i]:
+                        print(val)
                         SAPlateDict[val] = 1
                         PlateWellDict[i+1].append(row+col)
                         AOItoPlateDict[possibleMatches[0]] = i+1
@@ -273,6 +308,7 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
 
     return(sampleInfo) 
     
+
 
 def read_Surf_Areas(wsPath, indexList, columnList):
     with open(wsPath, 'r')as f:
