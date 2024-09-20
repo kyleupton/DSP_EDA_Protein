@@ -3,6 +3,6 @@ rootDir : /output/path/here/
 initialDataPath : Initial Dataset.xlsx
 QCDataPath : Default_QC.xlsx
 labWorksheet01Path : Lab_Worksheet_P1001250001413A.txt
-sampleInfoFile : sampleInfo_with_Wells.csv
-selectedData : Col, Row
+sampleInfoFile : sampleInfo_with_wells.csv
+selectedData : Col, Row, label
 probeThresholdIdx : 32
