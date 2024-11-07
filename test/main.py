@@ -1,13 +1,13 @@
 import unittest
 
-from functions.masterdata import (
+from ../functions.masterdata import (
         master_data, 
         read_Surf_Areas, 
-        read_config, 
+        readConfig, 
         make_locate_list, 
         enter_locations, 
         read_plate_info,
-        get_unique_combos,
+        getUniqueCombos,
         check_plate_info,
         infer_plate_info)
 
@@ -28,22 +28,9 @@ class TestStringMethods(unittest.TestCase):
         with self.assertRaises(TypeError):
             s.split(2)
 
-
-class TestConfigMethods(unittest.TestCase):
-
-    def test_read_config(self):
-        result = readConfig()
-        print(result)
-        self.assertEqual(1,1)
-
-
 class TestMasterDataMethods(unittest.TestCase):
-    def setUp(self):
-        self.data = master_data('The widget')
 
-        configDict = read_config()
-
-	def test_read_config(self):
+	def test_readConfig(self):
 		result = readConfig()
 		print(result)
 		self.assertEqual(1,1)

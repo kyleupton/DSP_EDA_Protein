@@ -14,12 +14,14 @@ class master_data:
         
         self.wb = load_workbook(dataPath)
         self.ws = self.wb['Exported dataset']
-        self.values = [[y.value for y in x] for x in self.ws[self.ws.calculate_dimension()]]
+        self.values = [[y.value for y in x] 
+                for x in self.ws[self.ws.calculate_dimension()]]
 
         self.dropData = False
         self.threshold = False
         
-        ### Convert nested list to a pandas dataFrame and extract expression data with labels
+        # Convert nested list to a pandas dataFrame and 
+        # extract expression data with labels
     def get_data(self, fix_zeros=True, clean_names=True):
         df = pd.DataFrame(self.values)
         col3 = df.iloc[:,3].tolist()
@@ -28,12 +30,14 @@ class master_data:
         
         rowLabels = df.iloc[self.targIdx:,3]
         # rowLabels = [x.split(' (')[0] for x in rowLabels.values]
-        rowLabels = dict(zip([x for x in range(self.targIdx,self.targIdx+len(rowLabels))],rowLabels))
+        rowLabels = dict(zip([x for x in 
+            range(self.targIdx,self.targIdx+len(rowLabels))],rowLabels))
         rowLabels
 
         colLabels = df.iloc[0,4:]
         colLabels = [x.replace(' | ','_') for x in colLabels.values]
-        colLabels = dict(zip([x for x in range(4,4+len(colLabels))],colLabels))
+        colLabels = dict(zip([x for x in 
+            range(4,4+len(colLabels))],colLabels))
         colLabels
 
         self.data = df.iloc[self.targIdx:,4:].astype(np.float32)
@@ -44,8 +48,12 @@ class master_data:
                 # print(x)
                 for y in self.data.index:
                     # print(y)
-                    # Subtract 1 from hyb pos and hyb neg values as we currently don't use RCC files to determine which values have been changed from 0 to 1 for Neg control.
-                    # Canging hyb-pos values may help to ameliorate effects of changing true 1 values to zero, average decrease in hyb neg values.
+                    # Subtract 1 from hyb pos and hyb neg values as we 
+                    # currently don't use RCC files to determine which values
+                    # have been changed from 0 to 1 for Neg control.
+                    # Changing hyb-pos values may help to ameliorate effects
+                    # of changing true 1 values to zero, average decrease in
+                    # hyb neg values.
                     if (y == 'HYB-NEG'):
                         self.data.loc[y,x] = self.data.loc[y,x] -1
                     # elif (y == 'HYB-POS'):
@@ -56,7 +64,8 @@ class master_data:
                             self.data.loc[y,x] = 0.0
 
         self.sampleInfo = pd.DataFrame(df.iloc[0:self.targIdx-1,4:])
-        self.sampleInfo.rename(index=df.iloc[0:self.targIdx-1,0], columns=colLabels, inplace=True)
+        self.sampleInfo.rename(index=df.iloc[0:self.targIdx-1,0], 
+                columns=colLabels, inplace=True)
         # print('sampleInfo.shape')
         # print(self.sampleInfo.shape)
         
@@ -64,19 +73,26 @@ class master_data:
         # print(self.data.shape)
 
         if clean_names:
-            removeChars = [' ','#','$','.',',','(',')','-','/','\\','__','__','__','__']
+            removeChars = [' ','#','$','.',',','(',')','-','/','\\',
+                '__','__','__','__']
             for r in removeChars:
-                self.data.columns = [x.replace(r,'_') for x in self.data.columns]
-                self.data.columns = ['X'+x if x[0] in ['0','1','2','3','4','5','6','7','8','9'] else x for x in self.data.columns]
-                self.sampleInfo.columns = [x.replace(r,'_') for x in self.sampleInfo.columns]
-                self.sampleInfo.columns = ['X'+x if x[0] in ['0','1','2','3','4','5','6','7','8','9'] else x for x in self.sampleInfo.columns]
+                self.data.columns = [x.replace(r,'_') for x in 
+                        self.data.columns]
+                self.data.columns = ['X'+x if x[0] in ['0','1','2','3','4',
+                        '5','6','7','8','9'] else x for x in 
+                        self.data.columns]
+                self.sampleInfo.columns = [x.replace(r,'_') for x in 
+                        self.sampleInfo.columns]
+                self.sampleInfo.columns = ['X'+x if x[0] in ['0','1','2','3',
+                        '4','5','6','7','8','9'] else x for x in 
+                        self.sampleInfo.columns]
 
 
         self.dataOrig = self.data.copy()
         # Log transform data for QC and analysis steps
         self.dataLog1 = np.log2(self.data+1)
         
-        self.probeClass = df.iloc[self.targIdx:,2]      ### Index needs updating here also
+        self.probeClass = df.iloc[self.targIdx:,2]
         self.probeClass.rename(index=rowLabels, inplace=True)
         self.probeClass.rename(index='ProbeClass', inplace=True)
         self.probeClassDict = {
@@ -100,24 +116,33 @@ class master_data:
         df = df.assign(mean=mean.values)
 
         ## Add column to data with probe class for each probe
-        df = df.assign(probeClass=[self.probeClassDict[v] for v in self.probeClass.values])
+        df = df.assign(probeClass=[self.probeClassDict[v] for v in 
+                self.probeClass.values])
 
         ### Extract lists of controls and their values
-        self.posCTLs = self.probeClass.index[self.probeClass== 'Positive'].tolist()
-        self.negCTLs = self.probeClass.index[self.probeClass== 'Negative'].tolist()
+        self.posCTLs = self.probeClass.index[self.probeClass== 'Positive']\
+            .tolist()
+        self.negCTLs = self.probeClass.index[self.probeClass== 'Negative']\
+            .tolist()
         self.IgCTLs = copy(self.negCTLs)
         try:
             self.IgCTLs.remove('HYB-NEG')
         except ValueError:
             pass
-        self.HK = self.probeClass.index[self.probeClass== 'Control'].tolist()
-        self.endog = self.probeClass.index[self.probeClass== 'Endogenous'].tolist()
+        self.HK = self.probeClass.index[self.probeClass== 'Control']\
+            .tolist()
+        self.endog = self.probeClass.index[self.probeClass== 'Endogenous']\
+            .tolist()
 
-        print('Positive Control count:\t{:d}, {}'.format(len(self.posCTLs), self.posCTLs))
-        print('Nagative Control count:\t{:d}, {}'.format(len(self.negCTLs), self.negCTLs))
-        print('Ig Control count:\t{:d}, {}'.format(len(self.IgCTLs), self.IgCTLs))
+        print('Positive Control count:\t{:d}, {}'.format(len(self.posCTLs),
+            self.posCTLs))
+        print('Nagative Control count:\t{:d}, {}'.format(len(self.negCTLs),
+            self.negCTLs))
+        print('Ig Control count:\t{:d}, {}'.format(len(self.IgCTLs), 
+            self.IgCTLs))
         print('HK Control count:\t{:d}, {}'.format(len(self.HK), self.HK))
-        print('Endogenous probe count:\t{:d}, {}'.format(len(self.endog), self.endog))
+        print('Endogenous probe count:\t{:d}, {}'.format(len(self.endog), 
+            self.endog))
 
         return df.copy(), self.sampleInfo.copy()
 
@@ -126,7 +151,8 @@ class master_data:
         dropAOIs = [x for x in list(self.data.columns) if (x in includes)]
         # print(dropAOIs)
         if writeOrig:
-            self.dataOrig = self.dataOrig.drop(labels=dropAOIs, axis=1, inplace=True)
+            self.dataOrig = self.dataOrig.drop(labels=dropAOIs, axis=1, 
+                inplace=True)
 
         # print(self.dataLog1.shape)
         self.dataLog1.drop(labels=dropAOIs, axis=1, inplace=True)
@@ -144,7 +170,8 @@ class master_data:
         self.threshold = threshold
         
         
-        # ToDo: Check that all values in master data are also included in threshold dataFrame
+        # ToDo: Check that all values in master data are also included in 
+        # threshold dataFrame
         # ToDo: Convert threshold data to 0/1 data if needed
         
     def drop_probes(self, labels):
@@ -174,14 +201,19 @@ class master_data:
             pass
             
         # ERCC normalisation. 
-        # Divide by individual HYB-POS values, then scale data using the geometric mean of all HYB-POS values. subtract in log space is same as divide in normal space. Add in log space is same as multiply in normal space
-        self.ERCCData = self.ERCCData - self.ERCCData.loc['HYB-POS'] + np.mean(self.ERCCData.loc['HYB-POS'])
+        # Divide by individual HYB-POS values, then scale data using the 
+        # geometric mean of all HYB-POS values. subtract in log space is same
+        # as divide in normal space. Add in log space is same as multiply in 
+        # normal space
+        self.ERCCData = self.ERCCData - self.ERCCData.loc['HYB-POS'] +\
+            np.mean(self.ERCCData.loc['HYB-POS'])
 
         # #ToDo: set below threshold values to 0
         # if (self.threshold):
         #     self.ERCCData = self.ERCCData * self.threshold
 
-        #set any negative values following ERCC noirmalisation to 0. These are at or below the limit of detection
+        #set any negative values following ERCC noirmalisation to 0. These are
+        # at or below the limit of detection
         for x in self.ERCCData.columns:
             # print(x)
             for y in self.ERCCData.index:
@@ -197,19 +229,22 @@ class master_data:
 
 def check_plate_info(sampleInfo):
     # Check Well, Row, Plate, Col fields in in sampleInfo
-    # Number of values should be less than number of samples if info has not been added.
+    # Number of values should be less than number of samples if info has not 
+    # been added.
     if (sampleInfo.loc[['Well','Row','Col','Plate']].isnull().any().any()):
         return False
     else:
         return(True)
-# ToDo : create function to check if all wells in a plate match by surface area
+# ToDo : create function to check if all wells in a plate match by 
+# surface area
 
 
 def infer_plate_info(sampleInfo, rootDir, wsFiles):
     # global sampleInfo
     # global configDict
     
-    sampleInfo.loc['AOI surface area'] = [round(x) for x in sampleInfo.loc['AOI surface area']]
+    sampleInfo.loc['AOI surface area'] = [round(x) for x in 
+        sampleInfo.loc['AOI surface area']]
     indexList = list(map(chr, range(ord('A'), ord('H')+1)))
     columnList = [str(n).zfill(2) for n in range(1,13)]
     validWells = []
@@ -219,9 +254,11 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
     wsList = []
     wellDFs = [] # Set up empty dataframe to be populated with sample names
     for x in wsFiles:
-        wsList.append(read_Surf_Areas(os.path.join(rootDir, x.strip()), indexList, columnList))
+        wsList.append(read_Surf_Areas(os.path.join(rootDir, x.strip()), 
+            indexList, columnList))
         
-        wellDFs.append(pd.DataFrame(data='', index = indexList, columns = columnList))
+        wellDFs.append(pd.DataFrame(data='', index = indexList, 
+            columns = columnList))
 
     wsAreaList = []
     allArea = []
@@ -280,7 +317,8 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
 
                 if ((not val==0) and (val in unique)):
                     SAWellDict[val] = row + col
-                    possibleMatches = sampleInfo.loc[:,sampleInfo.T['AOI surface area'] == val].columns 
+                    possibleMatches = sampleInfo.loc[:,
+                            sampleInfo.T['AOI surface area'] == val].columns 
                     if len (possibleMatches == 1):
                         wellDFs[i].loc[row,col] = possibleMatches[0]
                         AOItoWellDict[possibleMatches[0]] = row + col
@@ -297,12 +335,18 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
     
     toLocate = make_locate_list(sampleInfo, AOItoWellDict)
     
-    AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs = enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs)
+    AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs = enter_locations(
+        toLocate, validWells, AOItoPlateDict, AOItoWellDict, 
+        PlateWellDict, wellDFs)
     
-    AOIWell = pd.DataFrame(data = AOItoWellDict.values(), columns = ['Well'], index = AOItoWellDict.keys()).T
-    AOIRow = pd.DataFrame(data = [x[0] for x in AOItoWellDict.values()], columns = ['Row'], index = AOItoWellDict.keys()).T
-    AOICol = pd.DataFrame(data = [x[1:] for x in AOItoWellDict.values()], columns = ['Col'], index = AOItoWellDict.keys()).T
-    AOIPlate = pd.DataFrame(data = AOItoPlateDict.values(), columns = ['Plate'], index = AOItoPlateDict.keys()).T
+    AOIWell = pd.DataFrame(data = AOItoWellDict.values(), 
+        columns = ['Well'], index = AOItoWellDict.keys()).T
+    AOIRow = pd.DataFrame(data = [x[0] for x in AOItoWellDict.values()], 
+        columns = ['Row'], index = AOItoWellDict.keys()).T
+    AOICol = pd.DataFrame(data = [x[1:] for x in AOItoWellDict.values()], 
+        columns = ['Col'], index = AOItoWellDict.keys()).T
+    AOIPlate = pd.DataFrame(data = AOItoPlateDict.values(), 
+        columns = ['Plate'], index = AOItoPlateDict.keys()).T
     plateInfo = pd.concat([AOIWell, AOIRow, AOICol, AOIPlate])
     sampleInfo = pd.concat([sampleInfo, plateInfo])
 
@@ -355,8 +399,10 @@ def make_locate_list(sampleInfo, AOItoWellDict):
             prv  = '_'.join(smpl.split('_')[:smplIdx]) + '_' + prv
             nxt  = '_'.join(smpl.split('_')[:smplIdx]) + '_' + nxt
             nxt2 = '_'.join(smpl.split('_')[:smplIdx]) + '_' + nxt2
-            prvSamples = [x for x in sampleInfo.columns if ((prv in x) or (prv2 in x))]
-            nxtSamples = [x for x in sampleInfo.columns if ((nxt in x) or (nxt2 in x))]
+            prvSamples = [x for x in sampleInfo.columns if (
+                (prv in x) or (prv2 in x))]
+            nxtSamples = [x for x in sampleInfo.columns if (
+                (nxt in x) or (nxt2 in x))]
             toLocate.append([smpl, prvSamples, nxtSamples])
     # print(toLocate)
     # print('len(toLocate)')
@@ -372,7 +418,8 @@ def make_locate_list(sampleInfo, AOItoWellDict):
 # ToDo : Find a more pythonic way to make this code interactive
 # ToDo : Fix use of global variables
 
-def enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs):
+def enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, 
+    PlateWellDict, wellDFs):
 
     ##ToDo: Need an option to leave input blank to skip sample
 
@@ -404,7 +451,8 @@ def enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, PlateWe
             print('previous:')
             for p in sorted(t[1]):
                 try:
-                    print('\t\t\t' + p + '\t: ' + str(AOItoPlateDict[p]) + ' ' + AOItoWellDict[p])
+                    print('\t\t\t' + p + '\t: ' + str(
+                        AOItoPlateDict[p]) + ' ' + AOItoWellDict[p])
                 except KeyError:
                     print('\t\t\t' + p + '\t: not in dict')
 
@@ -414,10 +462,12 @@ def enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict, PlateWe
             print('next:')
             for n in sorted(t[2]):
                 try:
-                    print('\t\t\t' + n + '\t: ' + str(AOItoPlateDict[n]) + ' ' + AOItoWellDict[n])
+                    print('\t\t\t' + n + '\t: ' + str(
+                        AOItoPlateDict[n]) + ' ' + AOItoWellDict[n])
                 except KeyError:
                     print('\t\t\t' + n + '\t: not in dict')
-            plate = (input('enter plate for this sample, or press enter to pass'))
+            plate = (input(
+                'enter plate for this sample, or press enter to pass'))
 
             if (plate == ''):
                 clear_output(wait=False)
@@ -467,7 +517,7 @@ def read_plate_info(masterData, infoPath):
 
 
 ## read in paths from config file
-def readConfig():
+def read_config():
     configDict = {
         'rootDir': '',
         'initialDataPath' : '',
@@ -485,21 +535,25 @@ def readConfig():
                 fields = line.split(':')
                 print(f'{fields[0]} : {fields[1]}')
                 if fields[0].strip()=='initialDataPath':
-                    configDict[fields[0].strip()] = fields[1].strip().strip('\'')
+                    configDict[fields[0].strip()] = fields[1].strip(
+                        ).strip('\'')
                 elif fields[0].strip()=='probeThresholdIdx':
-                    configDict[fields[0].strip()] = int(fields[1].strip().strip('\''))
+                    configDict[fields[0].strip()] = int(fields[1].strip(
+                        ).strip('\''))
                 elif fields[0].strip()=='selectedData':
                     tempList = fields[1].strip().strip('\'').split(',')
                     tempList = [x.strip() for x in tempList]
                     tempList = [x for x in tempList if not x=='']
                     configDict['selectedData'] = tempList
                 else:
-                    configDict[fields[0].strip()] = fields[1].strip().strip('\'')
-    ## ToDo: Add checks to ensure that minimal fields have been populated. Raise errors or warnings
+                    configDict[fields[0].strip()] = fields[1].strip(
+                        ).strip('\'')
+    # ToDo: Add checks to ensure that minimal fields have been populated. 
+    # Raise errors or warnings
     return configDict
 
 
-def getUniqueCombos(selectedInfo):
+def get_unique_combos(selectedInfo):
     comboUniques = []
     for c in selectedInfo.columns:
         thisCol = selectedInfo[c]
