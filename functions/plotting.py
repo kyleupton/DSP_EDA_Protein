@@ -115,7 +115,7 @@ def probe_GeoMean_Plots(plotData, title=''):
     fig.tight_layout()
 
 
-class threshold_probes:
+class ThresholdProbes:
     def __init__(self, data, bins):
         self.data = data.drop(labels=['mean','probeClass'], axis=1)
         self.bins = bins
