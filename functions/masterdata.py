@@ -8,7 +8,7 @@ from IPython.display import clear_output
 import itertools as itertools
 from collections import Counter as cnt
 
-class master_data:
+class MasterData:
     def __init__(self, dataPath):
         ### import data from excel workbook
         
