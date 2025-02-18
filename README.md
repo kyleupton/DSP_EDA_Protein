@@ -22,4 +22,4 @@
     
     Download this package to a local directory to run in Jupyter notebooks
     
-    Further detail is contained in the index.ipynb
+    Further detail is contained in the index.ipynb notebook.

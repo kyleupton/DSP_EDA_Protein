@@ -22,12 +22,12 @@ labelFont = {'fontsize': 20}
 #  'horizontalalignment': loc}
 
 namedColourList = ['#377eb8', '#ff7f00', '#4daf4a',
-                  '#f781bf', '#a65628', '#984ea3',
-                  '#999999', '#e41a1c', '#dede00']
+                   '#f781bf', '#a65628', '#984ea3',
+                   '#999999', '#e41a1c', '#dede00']
 
 
 def plot_SA_Hist(surfArea):
-    fig, ax = plt.subplots(figsize=(10,5))
+    fig, ax = plt.subplots(figsize=(10, 5))
     ax.hist(surfArea, bins=50)
     ax.set_xlabel('AOI Surface Area µm', fontdict=labelFont)
     ax.set_ylabel('Count', fontdict=labelFont)
@@ -38,32 +38,36 @@ def plot_SA_Hist(surfArea):
 
 
 # Plot log2 transformed raw data before any normalisation
-def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, title='Title', exp=False, violin=False, savefig=False):
+def draw_probe_plot(probeData, sampleInfo, selectedInfo,
+                    subSelection=None, title='Title', exp=False,
+                    violin=False, savefig=False):
     if not (type(subSelection) == 'NoneType'):
         selectedInfo = selectedInfo.loc[subSelection]
     if (type(selectedInfo) == pd.core.series.Series):
         selectedInfo = pd.DataFrame(selectedInfo).T
-    
+
     # Sort data according to dataSortedRaw
-    probeData = probeData.drop(labels=['mean','probeClass'], axis=1).reindex(labels=probeData.index)
-    sampleInfo = sampleInfo.loc[:,probeData.columns]
+    probeData = probeData.drop(labels=['mean', 'probeClass'], axis=1)\
+        .reindex(labels=probeData.index)
+    sampleInfo = sampleInfo.loc[:, probeData.columns]
     selectedInfo = selectedInfo[probeData.columns]
 
-    fig, ax = plt.subplots(figsize=(15,8))
+    fig, ax = plt.subplots(figsize=(15, 8))
     if exp:
-        ax.boxplot(np.exp2(probeData.T) -1, sym='-', labels=probeData.index)
+        ax.boxplot(np.exp2(probeData.T) - 1,
+                   sym='-', labels=probeData.index)
     else:
         ax.boxplot(probeData.T, sym='-', labels=probeData.index)
 
     if violin:
         if exp:
-            ax.violinplot(np.exp2(probeData.T) -1)
+            ax.violinplot(np.exp2(probeData.T) - 1)
         else:
             ax.violinplot(probeData.T)
     else:
         my_cmap, colours = get_colour_mapping(sampleInfo, selectedInfo)
         my_cmap = plt.get_cmap("nipy_spectral")(colours)
-        for i,j in enumerate(probeData.index):
+        for i, j in enumerate(probeData.index):
             y = probeData.loc[j]
             y = y
             if exp:
@@ -71,12 +75,12 @@ def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, titl
             else:
                 y = y.values
             x = np.random.normal(i+1, 0.1, len(y))
-            for i in range(len(x)): 
-                ax.plot(x[i], y[i], color=my_cmap[i], marker='.')#
+            for i in range(len(x)):
+                ax.plot(x[i], y[i], color=my_cmap[i], marker='.')
 
-    ax.set_xticks(np.arange(1,len(probeData.index)+1,1))
-    ax.set_xlabel=list(probeData.index)
-    ax.tick_params(axis='x', labelrotation = 90)
+    ax.set_xticks(np.arange(1, len(probeData.index)+1, 1))
+    ax.set_xlabel = list(probeData.index)
+    ax.tick_params(axis='x', labelrotation=90)
 
     if exp:
         ax.semilogy()
@@ -88,24 +92,29 @@ def draw_probe_plot(probeData, sampleInfo, selectedInfo, subSelection=None, titl
 #     plt.show()
     return(fig)
 
-    if not (savefig==False):
+    if not (savefig is False):
         plt.savefig(savefig, dpi='figure', format='svg')
 
 
-
 def probe_GeoMean_Plots(plotData, title=''):
-    rows=1
-    cols=2
-    colours = [namedColourList[2] if x.split('_')[-1] == 'Tumour' else namedColourList[5] if x.split('_')[-1] == 'TME' else namedColourList[1] for x in plotData.index]
+    rows = 1
+    cols = 2
+    colours = [namedColourList[2] if x.split('_')[-1] == 'Tumour'
+               else namedColourList[5] if x.split('_')[-1] == 'TME'
+               else namedColourList[1] for x in plotData.index]
 
-    fig,ax = plt.subplots(rows,cols, sharey=True, gridspec_kw={'width_ratios': [4,1]}, figsize=(15,5))
-    ax[0].bar(np.linspace(1,len(plotData),len(plotData)), plotData, color=colours)
-    ax[1].hist(plotData, bins=int(len(plotData)/10),orientation='horizontal', color='k')
-    ax[0].set_xlim(0,len(plotData))
-    
-    ax[0].text(2,max(plotData)*.95,'Tumour', size=20, c=namedColourList[2])
-    ax[0].text(2,max(plotData)*.825,'TME', size=20, c=namedColourList[5])
-    ax[0].text(2,max(plotData)*.7,'Other', size=20, c=namedColourList[1])
+    fig, ax = plt.subplots(rows, cols, sharey=True,
+                           gridspec_kw={'width_ratios': [4, 1]},
+                           figsize=(15, 5))
+    ax[0].bar(np.linspace(1, len(plotData), len(plotData)),
+              plotData, color=colours)
+    ax[1].hist(plotData, bins=int(len(plotData)/10),
+               orientation='horizontal', color='k')
+    ax[0].set_xlim(0, len(plotData))
+
+    ax[0].text(2, max(plotData)*.95, 'Tumour', size=20, c=namedColourList[2])
+    ax[0].text(2, max(plotData)*.825, 'TME', size=20, c=namedColourList[5])
+    ax[0].text(2, max(plotData)*.7, 'Other', size=20, c=namedColourList[1])
 
     fig.suptitle(title, size=36)
     ax[0].set_ylabel('Probe Value', size=18)
@@ -115,25 +124,25 @@ def probe_GeoMean_Plots(plotData, title=''):
     fig.tight_layout()
 
 
-class threshold_probes:
+class ThresholdProbes:
     def __init__(self, data, bins):
-        self.data = data.drop(labels=['mean','probeClass'], axis=1)
+        self.data = data.drop(labels=['mean', 'probeClass'], axis=1)
         self.bins = bins
-        self.thisHist = plt.hist(self.data.values.flatten(), bins = self.bins)
+        self.thisHist = plt.hist(self.data.values.flatten(), bins=self.bins)
         plt.title('Thresholding plot')
         plt.xlabel('Probe value (log2 transformed)')
         plt.ylabel('Count')
 
     def zoom_plot(self, start, end):
         maxY = max(self.thisHist[0][2:])*1.2
-        plt.hist(self.data.values.flatten(), bins = self.bins)
-        plt.xlim(start,end)        
-        plt.ylim(0,maxY)
-        plt.axvline(self.threshold, c='red')     
+        plt.hist(self.data.values.flatten(), bins=self.bins)
+        plt.xlim(start, end)
+        plt.ylim(0, maxY)
+        plt.axvline(self.threshold, c='red')
         plt.title('Thresholding Zoom plot')
         plt.xlabel('Probe value (log2 transformed)')
         plt.ylabel('Count')
-        
+
     def check_threshold(self, start, end):
         print(f'Histogram[0] range :\t{self.thisHist[0][start:end]}')
         print(f'Histogram[1] range :\t{self.thisHist[1][start:end]}')
@@ -144,9 +153,9 @@ class threshold_probes:
     def set_threshold_idx(self, idx):
         # print(f'Histogram[0][idx] value :\t{self.thisHist[0][idx]}')
         # print(f'Histogram[1][idx] value :\t{self.thisHist[1][idx]}')
-        print(f'Threshold index :\t%d'%(idx))
-        print(f'Threshold count :\t%d'%(self.thisHist[0][idx]))
-        print(f'Threshold point :\t%6.3f'%(self.thisHist[1][idx]))
+        print(f'Threshold index :\t%d' % (idx))
+        print(f'Threshold count :\t%d' % (self.thisHist[0][idx]))
+        print(f'Threshold point :\t%6.3f' % (self.thisHist[1][idx]))
         self.threshold_idx = idx
         self.threshold = self.thisHist[1][idx]
 
@@ -161,7 +170,7 @@ def get_colour_mapping(sampleInfoExternal, selectedInfo):
     comboColourDictRev = {}
 
     if (type(selectedInfo) == pd.core.series.Series):
-        for k,v in selectedInfo.items():
+        for k, v in selectedInfo.items():
             comboUniques.append(v)
             comboColourDictRev[k] = v
     else:
@@ -175,95 +184,100 @@ def get_colour_mapping(sampleInfoExternal, selectedInfo):
     print('\nNumber of unique combinations: {}'.format(len(comboUniques)))
     # print(comboColourDictRev)
     gradient = np.linspace(0, 1, len(comboUniques))
-    gradDict = dict(zip(comboUniques,gradient))
-    
-    # sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
-    # sampleInfoExternal.sort_values(by=list(selectedInfo.index), axis=1, inplace=True)
-    # Binding Density plot:
-    # plt.figure(figsize=(40,10))
+    gradDict = dict(zip(comboUniques, gradient))
     my_cmap = plt.get_cmap("nipy_spectral")
-    
     colours = []
     for c in sampleInfoExternal.columns:
-        # When there are only 2 different values the nipy_spectral cmap outputs black and grey. A cmap like rainbow may be better, or here we change the values away from the extremes of the cmap.
+        # When there are only 2 different values the nipy_spectral cmap
+        # outputs black and grey. A cmap like rainbow may be better, or
+        # here we change the values away from the extremes of the cmap.
         if len(comboUniques) == 2:
             colours.append(abs(gradDict[comboColourDictRev[c]] - 0.15))
         else:
             colours.append(gradDict[comboColourDictRev[c]])
-    # print('selectedInfo.index')
-    # print(list(selectedInfo.index))
-    # print('selectedInfo.columns')
-    # print(list(selectedInfo.columns))
-    # print()
     return my_cmap, colours
-
 
 
 def binding_density_plot(sampleInfoExternal, selectedInfo, subSelection):
     # print('selectedInfo')
     # print(selectedInfo)
-    if not (subSelection == None):
+    if not (subSelection is None):
         selectedInfo = selectedInfo.loc[subSelection]
     if (type(selectedInfo) == pd.core.series.Series):
         selectedInfo = pd.DataFrame(selectedInfo).T
-        
-    sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'], axis=1, inplace=True)
+
+    sampleInfoExternal.sort_values(by=['Plate', 'Col', 'Row'],
+                                   axis=1, inplace=True)
     my_cmap, colours = get_colour_mapping(sampleInfoExternal, selectedInfo)
 
-    fig, ax = plt.subplots(figsize=(20,5))
-    
+    fig, ax = plt.subplots(figsize=(20, 5))
+
     bar = ax.bar(sampleInfoExternal.columns,
-            sampleInfoExternal.loc['BindingDensity'].values.astype(np.float32), 
-            color=my_cmap(colours)
-           )#, bottom=0)
+                 sampleInfoExternal.loc['BindingDensity']
+                 .values.astype(np.float32),
+                 color=my_cmap(colours)
+                 )
     ax.set_title('_'.join(selectedInfo.index))
     ax.set_xticklabels(sampleInfoExternal.columns, rotation='vertical')
     plt.show()
 
-# ToDo: Add legend
 
 def volcanoPlot(dataPath, file, pVal=True, plot=True):
+    # ToDo: Add legend
     if pVal:
         sigType = 'PValue'
     else:
         sigType = 'FDR'
 
     sigGenes = []
-    data = pd.read_csv(os.path.join(dataPath,file), index_col = 0)
+    data = pd.read_csv(os.path.join(dataPath, file), index_col=0)
 
-    colours = ['r' if (abs(data.loc[x, 'logFC'])>1 and data.loc[x, sigType]<0.05)  else 'c' if data.loc[x, sigType]<0.05 else 'k' for x in data.index ]
+    colours = ['r' if (abs(data.loc[x, 'logFC']) > 1 and
+               data.loc[x, sigType] < 0.05) else 'c' if
+               data.loc[x, sigType] < 0.05 else 'k' for x in data.index]
     # plt.scatter(data['logFC'],np.log(data[sigType])*-1, c=colours)
-    
+
     if plot:
-        plt.scatter(data['logFC'],np.log(data[sigType])*-1, c=data['logFC'], cmap='coolwarm', vmin = -max(abs(data['logFC'])), vmax = max(abs(data['logFC'])))
+        plt.scatter(data['logFC'], np.log(data[sigType])*-1,
+                    c=data['logFC'], cmap='coolwarm',
+                    vmin=-max(abs(data['logFC'])),
+                    vmax=max(abs(data['logFC'])))
         plt.ylabel('-log10 ' + sigType)
 
         plt.xlabel('log2 Fold Change')
         plt.axhline(-np.log(0.05))
-        plt.axvline(np.log2(2), c='r', dashes=[5,3])
-        plt.axvline(-np.log2(2), c='r', dashes=[5,3])
-        plt.title(file.split('.')[0][file.rfind('/')+1:]) # Use path and extension trimmed file name as figure title
-
+        plt.axvline(np.log2(2), c='r', dashes=[5, 3])
+        plt.axvline(-np.log2(2), c='r', dashes=[5, 3])
+        # Use path and extension trimmed file name as figure title
+        plt.title(file.split('.')[0][file.rfind('/')+1:])
     for gene in data.index:
-        if (data.loc[gene,sigType] < 0.05):
+        if (data.loc[gene, sigType] < 0.05):
             sigGenes.append(gene)
             label = gene
             if plot:
-                plt.annotate(label, # this is the text
-                             (data.loc[gene,'logFC'],-np.log(data.loc[gene,sigType])), # these are the coordinates to position the label
-                             textcoords="offset points", # how to position the text
-                             xytext=(0,10), # distance from text to points (x,y)
-                             ha='left') # horizontal alignment can be left, right or center
-                
+                plt.annotate(
+                             # this is the text
+                             label,
+                             (data.loc[gene, 'logFC'],
+                              # these are the coordinates to pos'n the label
+                              -np.log(data.loc[gene, sigType])),
+                             # how to position the text
+                             textcoords="offset points",
+                             # distance from text to points (x, y)
+                             xytext=(0, 10),
+                             # horizontal alignment can be l, r or center
+                             ha='left')
     if plot:
-        outfile = file.split('.')[0] + '.png'   
+        outfile = file.split('.')[0] + '.png'
         print(outfile)
-        plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='png')
-        outfile = file.split('.')[0] + '.svg'   
-        plt.savefig(os.path.join(dataPath,outfile), dpi='figure', format='svg')
+        plt.savefig(os.path.join(dataPath, outfile),
+                    dpi='figure', format='png')
+        outfile = file.split('.')[0] + '.svg'
+        plt.savefig(os.path.join(dataPath, outfile),
+                    dpi='figure', format='svg')
         plt.show()
     return(sigGenes)
-    
+
 
 def plot_dendrogram(model, **kwargs):
     # create the counts of samples under each node
@@ -277,7 +291,6 @@ def plot_dendrogram(model, **kwargs):
             else:
                 current_count += counts[child_idx - n_samples]
         counts[i] = current_count
-        
     # Create linkage matrix and then plot the dendrogram
     linkage_matrix = np.column_stack(
         [model.children_, model.distances_, counts]
@@ -289,21 +302,18 @@ def plot_dendrogram(model, **kwargs):
 
 def get_factor_colours(AOINames, factors, varLookup, sampleInfo):
     colourArray = []
-    AOINames = [x.replace(' ','.') for x in AOINames]
+    AOINames = [x.replace(' ', '.') for x in AOINames]
     for f in factors:
-        tempVarNames = sampleInfo.loc[f,AOINames].values
+        tempVarNames = sampleInfo.loc[f, AOINames].values
         colours = [varLookup[x] for x in tempVarNames]
         colourArray.append(colours)
     return(colourArray)
-    
+
 
 def get_connectivity(data, T=False):
-    if T==True:
+    if T is True:
         cosineDistance = 1 - sklearn.metrics.pairwise.cosine_distances(data.T)
     else:
         cosineDistance = 1 - sklearn.metrics.pairwise.cosine_distances(data)
-    knnCosine = sklearn.neighbors.kneighbors_graph(cosineDistance,2)
+    knnCosine = sklearn.neighbors.kneighbors_graph(cosineDistance, 2)
     return(knnCosine)
-    
-    
-
