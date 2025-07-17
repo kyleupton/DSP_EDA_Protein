@@ -11,22 +11,48 @@ from collections import Counter as cnt
 
 class MasterData:
     def __init__(self, dataPath):
-        # import data from excel workbook
+        # Set up master data object
+        # dataPath is path to excel workbook with data
+        self.dataPath = dataPath
+        self.data = None
+        self.dataLog1 = None
+        self.dataOrig = None
+        self.sampleInfo = None
+        self.probeClass = None
+        self.probeClassDict = None
+        self.posCTLs = None
+        self.negCTLs = None
+        self.IgCTLs = None
+        self.HK = None
+        self.endog = None
+        self.targIdx = None
+        self.ERCCData = None
+        self.ERCCDataLog1 = None
+        self.ERCCDataOrig = None
+        self.ERCCDataLog1Orig = None
+        self.dataLog1Orig = None
+        self.dataOrig = None
+        self.dataLog1 = None
+        self.sampleInfoOrig = None
+        self.sampleInfoLog1 = None
+        self.sampleInfoLog1Orig = None
+
+        self.dropData = False
+        self.threshold = False
+
+        # Load data from excel workbook
         self.wb = load_workbook(dataPath)
         self.ws = self.wb['Exported dataset']
         self.values = [[y.value for y in x]
                        for x in self.ws[self.ws.calculate_dimension()]]
-        self.dropData = False
-        self.threshold = False
 
     def get_data(self, fix_zeros=True, clean_names=True):
         # Convert nested list to a pandas dataFrame and extract
         # expression data with labels
-        df = pd.DataFrame(self.values)
+        df = pd.DataFrame(self.values)  # Convert to DataFrame
         col3 = df.iloc[:, 3].tolist()
         self.targIdx = col3.index('Target name (display name)') + 1
         rowLabels = df.iloc[self.targIdx:, 3]
-        # rowLabels = [x.split(' (')[0] for x in rowLabels.values]
         rowLabels = dict(zip([x for x in range(
             self.targIdx, self.targIdx+len(rowLabels))], rowLabels))
         rowLabels
@@ -42,14 +68,14 @@ class MasterData:
                 # print(x)
                 for y in self.data.index:
                     # print(y)
-                    # Subtract 1 from hyb pos and hyb neg values as we
-                    # currently don't use RCC files to determine which values
+                    # Subtract 1 from hyb neg values as we currently
+                    # don't use RCC files to determine which values
                     # have been changed from 0 to 1 for Neg control.
-                    # Changing hyb-pos values may help to ameliorate effects
-                    # of changing true 1 values to zero, average decrease in
-                    # hyb neg values.
                     if (y == 'HYB-NEG'):
                         self.data.loc[y, x] = self.data.loc[y, x] - 1
+                    # Changing hyb-pos values may help to ameliorate effects
+                    # of average decrease in hyb neg values from changing true
+                    # 1 values to zero.
                     # elif (y == 'HYB-POS'):
                     #     self.data.loc[y, x] = self.data.loc[y, x] - 1
                     else:
@@ -447,7 +473,8 @@ def read_plate_info(masterData, infoPath):
 
 
 def read_config():
-    # read in paths from config file
+    # Read in config file and return a dictionary with paths and other
+    # parameters
     configDict = {
         'rootDir': '',
         'initialDataPath': '',
@@ -456,27 +483,35 @@ def read_config():
         'projectName': '',
         'selectedData': []
     }
+    if not os.path.exists('config.txt'):
+        print('config.txt not found, please create a config file')
+        return configDict
+    print('Reading config.txt')
     with open('config.txt', 'r') as f:
+        # Read config file and populate configDict
         lines = f.readlines()
         for line in lines:
             if ((not line.startswith('#')) and (not line.strip() == '')):
                 line = line.strip()
                 fields = line.split(':')
                 print(f'{fields[0]} : {fields[1]}')
-                if fields[0].strip() == 'initialDataPath':
+                if len(fields) < 2:
+                    print('Error in config.txt, line: {}'.format(line))
+                    continue
+                if fields[0].strip() == 'initialDataPath':  # Path to initial data
                     configDict[fields[0].strip()] = fields[1].strip(
                         ).strip('\'')
-                elif fields[0].strip() == 'probeThresholdIdx':
+                elif fields[0].strip() == 'probeThresholdIdx':  # Index of probe threshold
                     configDict[fields[0].strip()] = int(fields[1].strip(
                         ).strip('\''))
-                elif fields[0].strip() == 'selectedData':
+                elif fields[0].strip() == 'selectedData':  # List of selected data
                     tempList = fields[1].strip().strip('\'').split(',')
                     tempList = [x.strip() for x in tempList]
                     tempList = [x for x in tempList if not x == '']
                     configDict['selectedData'] = tempList
                 else:
                     configDict[fields[0].strip()] = fields[1].strip(
-                        ).strip('\'')
+                        ).strip('\'')  # Load other parameters into dictionary
     # ToDo: Add checks to ensure that minimal fields have been populated.
     # Raise errors or warnings
     return configDict
