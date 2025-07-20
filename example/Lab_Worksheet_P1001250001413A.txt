@@ -1,0 +1,36 @@
+Laboratory Worksheet
+DSP Plate barcode: 1001250001413
+Counting Device Type: nCounter
+Readout kit: Protein
+
+Row     Core, Module(s)
+ A  Human Immune Cell Profiling Protein Core (v1.0)
+ B  Human Immune Cell Profiling Protein Core (v1.0)
+ C  N/A
+ D  N/A
+ E  N/A
+ F  N/A
+ G  N/A
+ H  N/A
+
+GeoMx Hyb Code Pack Lot Number:  _________________________
+
+nCounter MAX/FLEX readout configuration file: P1001250001413A.cdf
+         Ensure that the DSP_v1.0.rlf has been loaded on your system
+
+nCounter SPRINT run name: (user defined)
+nCounter SPRINT lanes to define: 1-12
+nCounter SPRINT sample name (all lanes): P1001250001413A
+nCounter SPRINT RLF name (all lanes): DSP_v1.0.rlf
+
+
+Area μm2      1       2       3       4       5       6       7       8       9      10      11      12
+   A       21891   50650    1762   21831     696    5004  107663   22538    6762   70509  114406   20199
+   B       71728   44538  111708      64     162   46369   38539     407   24261    1873   62261   17634
+   C    
+   D    
+   E    
+   F    
+   G    
+   H    
+ Totals    93619   95188  113470   21895     858   51373  146202   22945   31023   72382  176667   37833
