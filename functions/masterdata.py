@@ -208,6 +208,7 @@ class MasterData:
             print('HK Control count:\t{:d}, {}'.format(len(self.HK), self.HK))
             print('Endogenous probe count:\t{:d}, {}'.format(len(self.endog),
                 self.endog))
+        return df
         # return df.copy(), self.sampleInfo.copy()
 
     def prepare_data(self, fix_zeros:bool=True, clean_names:bool=True) -> None:
