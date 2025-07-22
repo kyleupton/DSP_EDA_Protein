@@ -320,7 +320,9 @@ class MasterData:
         self.sampleInfo = match_wells_to_AOIs(self.sampleInfo, wsList, wellDFs, validWells)
 
 
-
+        infoPath = os.path.join(configDict['rootDir'], configDict['sampleInfoFile'])
+        if writeInfo:
+            self.sampleInfo.to_csv(os.path.join(self.dataPath[:self.dataPath.rfind('/')],'sampleInfo_with_wells.csv'))
 
 
 
