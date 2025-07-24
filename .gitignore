@@ -4,7 +4,7 @@ projects*
 EdgeR_Config.txt
 EdgeR_Studio.R
 localhelpers
-
+functions/_*
 
 # Figure and data outputs #
 ###########################
@@ -41,9 +41,12 @@ localhelpers
 *.sqlite
 *checkpoint.ipynb
 .ipynb_checkpoints
+*sublime*
 
 # OS generated files #
 ######################
+.vscode*
+.qodo
 .DS_Store
 .DS_Store?
 ._*

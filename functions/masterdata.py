@@ -10,81 +10,147 @@ from collections import Counter as cnt
 
 
 class MasterData:
-    def __init__(self, dataPath):
-        # import data from excel workbook
-        self.wb = load_workbook(dataPath)
+    def __init__(self, dataPath: str) -> None:
+        # Set up master data object
+        # dataPath is path to excel workbook with data
+        self.dataPath = dataPath
+        # Load data from excel workbook
+        self.wb = load_workbook(self.dataPath)
         self.ws = self.wb['Exported dataset']
         self.values = [[y.value for y in x]
                        for x in self.ws[self.ws.calculate_dimension()]]
+
+
+
+        self.rawdf = None
+        self.targIdx = None
+        self.rowLabels = None
+        self.colLabels = None
+        self.data = None
+
+        self.nuclei = None
+        self.surfArea = None
+
+
+
+        self.dataLog1 = None
+        self.dataOrig = None
+        self.sampleInfo = None
+        self.probeClass = None
+        self.probeClassDict = None
+        self.posCTLs = None
+        self.negCTLs = None
+        self.IgCTLs = None
+        self.HK = None
+        self.endog = None
+        self.ERCCData = None
+        self.ERCCDataLog1 = None
+        self.ERCCDataOrig = None
+
+        self.sampleInfoOrig = None
+        self.sampleInfoLog1 = None
+        self.sampleInfoLog1Orig = None
+
         self.dropData = False
         self.threshold = False
 
-    def get_data(self, fix_zeros=True, clean_names=True):
+    def get_data(self) -> None:
+        """Reads data from excel workbook and converts to pandas DataFrame.
+         
+        It also extracts the sample information and probe class information. 
+        If fix_zeros is True,
+        it will fix the zeros in the data by subtracting 1 from the HYB-NEG
+        values and changing all 1 values to 0 for other probes. 
+        If clean_names is True,
+        """
         # Convert nested list to a pandas dataFrame and extract
         # expression data with labels
-        df = pd.DataFrame(self.values)
-        col3 = df.iloc[:, 3].tolist()
+        self.rawdf = pd.DataFrame(self.values)  # Convert to DataFrame
+        col3 = self.rawdf.iloc[:, 3].tolist()
         self.targIdx = col3.index('Target name (display name)') + 1
-        rowLabels = df.iloc[self.targIdx:, 3]
-        # rowLabels = [x.split(' (')[0] for x in rowLabels.values]
-        rowLabels = dict(zip([x for x in range(
-            self.targIdx, self.targIdx+len(rowLabels))], rowLabels))
-        rowLabels
-        colLabels = df.iloc[0, 4:]
-        colLabels = [x.replace(' | ', '_') for x in colLabels.values]
-        colLabels = dict(zip([x for x in range(
-            4, 4+len(colLabels))], colLabels))
-        colLabels
-        self.data = df.iloc[self.targIdx:, 4:].astype(np.float32)
-        self.data.rename(index=rowLabels, columns=colLabels, inplace=True)
-        if fix_zeros:
-            for x in self.data.columns:
-                # print(x)
-                for y in self.data.index:
-                    # print(y)
-                    # Subtract 1 from hyb pos and hyb neg values as we
-                    # currently don't use RCC files to determine which values
-                    # have been changed from 0 to 1 for Neg control.
-                    # Changing hyb-pos values may help to ameliorate effects
-                    # of changing true 1 values to zero, average decrease in
-                    # hyb neg values.
-                    if (y == 'HYB-NEG'):
-                        self.data.loc[y, x] = self.data.loc[y, x] - 1
-                    # elif (y == 'HYB-POS'):
-                    #     self.data.loc[y, x] = self.data.loc[y, x] - 1
-                    else:
-                        if (self.data.loc[y, x] == 1):
-                            # print(x,y)
-                            self.data.loc[y, x] = 0.0
-        self.sampleInfo = pd.DataFrame(df.iloc[0:self.targIdx-1, 4:])
+        self.rowLabels = self.rawdf.iloc[self.targIdx:, 3]
+        self.rowLabels = dict(zip([x for x in range(
+            self.targIdx, self.targIdx+len(self.rowLabels))], self.rowLabels))
+        # rowLabels
+        self.colLabels = self.rawdf.iloc[0, 4:]
+        self.colLabels = [x.replace(' | ', '_') for x in self.colLabels.values]
+        self.colLabels = dict(zip([x for x in range(
+            4, 4+len(self.colLabels))], self.colLabels))
+        print("self.colLabels")
+        print(self.colLabels)
+        self.data = self.rawdf.iloc[self.targIdx:, 4:].astype(np.float32)
+        self.data.rename(index=self.rowLabels, columns=self.colLabels, inplace=True)
+
+    def fix_zeros(self) -> None:
+        """Fixes zeros in the data by subtracting 1 from HYB-NEG values \
+            and changing all 1 values to 0 for other probes."""
+
+        for x in self.data.columns:
+            # print(x)
+            for y in self.data.index:
+                # print(y)
+                # Subtract 1 from hyb neg values as we currently
+                # don't use RCC files to determine which values
+                # have been changed from 0 to 1 for Neg control.
+                if (y == 'HYB-NEG'):
+                    self.data.loc[y, x] = self.data.loc[y, x] - 1
+                # Changing hyb-pos values may help to ameliorate effects
+                # of average decrease in hyb neg values, especially where
+                # true 1 values were changed to zero.
+                # elif (y == 'HYB-POS'):
+                #     self.data.loc[y, x] = self.data.loc[y, x] - 1
+                else:
+                    if (self.data.loc[y, x] == 1):
+                        # print(x,y)
+                        self.data.loc[y, x] = 0.0
+
+    def get_sample_info(self, df:pd.DataFrame) -> None:
+        """Extracts sample information from the data and renames the index \
+        and columns of the sample information DataFrame.
+        """
+
+        self.sampleInfo = pd.DataFrame(df.iloc[0:self.targIdx-1, 4:]) # Extract sample information
         self.sampleInfo.rename(index=df.iloc[
                                0:self.targIdx-1, 0],
-                               columns=colLabels,
+                               columns=self.colLabels,
                                inplace=True)
-        # print('sampleInfo.shape')
-        # print(self.sampleInfo.shape)
-        # print('data.shape')
-        # print(self.data.shape)
-        if clean_names:
-            removeChars = [' ', '#', '$', '.', ', ', '(', ')', '-', '/', '\\',
-                           '__', '__', '__', '__']
-            for r in removeChars:
-                self.data.columns = [x.replace(
-                                     r, '_') for x in self.data.columns]
-                self.data.columns = ['X'+x if x[0] in ['0', '1', '2', '3',
-                                     '4', '5', '6', '7', '8', '9'] else x
-                                     for x in self.data.columns]
-                self.sampleInfo.columns = [x.replace(r, '_') for x in
-                                           self.sampleInfo.columns]
-                self.sampleInfo.columns = ['X'+x if x[0] in ['0', '1', '2',
-                                           '3', '4', '5', '6', '7', '8', '9']
-                                           else x for x in
-                                           self.sampleInfo.columns]
-        self.dataOrig = self.data.copy()
-        # Log transform data for QC and analysis steps
-        self.dataLog1 = np.log2(self.data+1)
+
+    def clean_names(self, clean_names=True) -> None:
+        """Cleans the column names by removing unwanted characters and \ 
+        adding 'X' prefix to names starting with a digit.
+        
+        Args:
+            clean_names (bool): If True, performs the operation. Defaults to True.
+
+        Returns:
+            None: This function modifies the data and sampleInfo DataFrames in place.
+        """
+        # if clean_names:
+        removeChars = [' ', '#', '$', '.', ', ', '(', ')', '-', '/', '\\',
+                        '__', '__', '__', '__']
+        for r in removeChars:
+            # Remove unwanted characters
+            self.data.columns = [x.replace(
+                                    r, '_') for x in self.data.columns] 
+            self.sampleInfo.columns = [x.replace(r, '_') for x in
+                                        self.sampleInfo.columns]
+            
+            # Add 'X' prefix to names starting with a digit
+            self.data.columns = ['X'+x if x[0] in ['0', '1', '2', '3',
+                                    '4', '5', '6', '7', '8', '9'] else x
+                                    for x in self.data.columns]
+            self.sampleInfo.columns = ['X'+x if x[0] in ['0', '1', '2',
+                                        '3', '4', '5', '6', '7', '8', '9']
+                                        else x for x in
+                                        self.sampleInfo.columns]
+
+    def get_probe_class(self, df:pd.DataFrame) -> None:
+        """Extracts the probe class information from the data.
+
+        It renames the index and columns of the probe class DataFrame.
+        """
         self.probeClass = df.iloc[self.targIdx:, 2]
-        self.probeClass.rename(index=rowLabels, inplace=True)
+        self.probeClass.rename(index=self.rowLabels, inplace=True)
         self.probeClass.rename(index='ProbeClass', inplace=True)
         self.probeClassDict = {
             'Positive': 'A',
@@ -92,15 +158,26 @@ class MasterData:
             'Control': 'C',
             'Endogenous': 'E'
         }
-        return self.data.copy(), self.dataLog1.copy(), self.sampleInfo.copy()
+        # return self.data.copy(), self.dataLog1.copy(), self.sampleInfo.copy()
 
     def get_descriptors(self):
+        """Extracts the number of nuclei and surface area for each sample.
+        """
         # Extract descriptions for each sample
-        nuclei = sampleInfo.loc['AOI nuclei count']
-        surfArea = sampleInfo.loc['AOI surface area']
+        self.nuclei = self.sampleInfo.loc['AOI nuclei count']
+        self.surfArea = self.sampleInfo.loc['AOI surface area']
         # print(sampleInfo.shape)
 
-    def add_class_mean(self, df):
+    def add_class_mean(self, df:pd.DataFrame, printInfo:bool=False) -> None:
+        """Adds a column to the data with the mean values for each probe \
+        and a column with the probe class for each probe.
+
+        Args:
+            df (pd.DataFrame): The DataFrame containing the data.
+            printInfo (bool): If True, prints probe count info. Defaults to False.
+        Returns:
+            None: This function modifies the DataFrame in place.
+        """
         # Add column to data with mean values for each probe (row)
         mean = df.mean(axis=1)
         df = df.assign(mean=mean.values)
@@ -121,16 +198,133 @@ class MasterData:
             .tolist()
         self.endog = self.probeClass.index[self.probeClass == 'Endogenous']\
             .tolist()
-        print('Positive Control count:\t{:d}, {}'.format(len(self.posCTLs),
-              self.posCTLs))
-        print('Nagative Control count:\t{:d}, {}'.format(len(self.negCTLs),
-              self.negCTLs))
-        print('Ig Control count:\t{:d}, {}'.format(len(self.IgCTLs),
-              self.IgCTLs))
-        print('HK Control count:\t{:d}, {}'.format(len(self.HK), self.HK))
-        print('Endogenous probe count:\t{:d}, {}'.format(len(self.endog),
-              self.endog))
-        return df.copy(), self.sampleInfo.copy()
+        if printInfo:
+            print('Positive Control count:\t{:d}, {}'.format(len(self.posCTLs),
+                self.posCTLs))
+            print('Nagative Control count:\t{:d}, {}'.format(len(self.negCTLs),
+                self.negCTLs))
+            print('Ig Control count:\t{:d}, {}'.format(len(self.IgCTLs),
+                self.IgCTLs))
+            print('HK Control count:\t{:d}, {}'.format(len(self.HK), self.HK))
+            print('Endogenous probe count:\t{:d}, {}'.format(len(self.endog),
+                self.endog))
+        return df
+        # return df.copy(), self.sampleInfo.copy()
+
+    def prepare_data(self, fix_zeros:bool=True, clean_names:bool=True) -> None:
+        """Prepares the data for analysis.
+         
+          This function automatically preforms the following steps:\
+          1. Reads the data from the excel workbook.
+          2. Fixes zeros in the data if fix_zeros is True.
+          3. Cleans the column names if clean_names is True.
+          4. Extracts sample information.
+          5. Makes a copy of the original data for later use.
+          6. Log transforms the data for QC and analysis steps.
+          7. Extracts probe class information
+          8. Extracts descriptors (nuclei count and surface area).
+          9. Adds class mean to the log-transformed data."""
+        
+        self.get_data()
+        if fix_zeros:
+            self.fix_zeros()
+        self.get_sample_info(self.rawdf)
+        if clean_names:
+            self.clean_names()
+        # Make a copy of the original data for later use
+        self.dataOrig = self.data.copy()
+        # Log transform data for QC and analysis steps
+        self.dataLog1 = np.log2(self.data+1)
+        self.get_probe_class(self.rawdf)
+        self.get_descriptors()
+        self.add_class_mean(self.dataLog1)
+    
+
+
+    def find_worksheets(self, configDict: dict) -> list:
+        """Finds and returns a list of worksheet files in the root directory.
+
+        Args:
+            configDict (dict): Dictionary containing configuration parameters.
+        
+        Returns:
+            list: List of worksheet files found in the root directory.
+        """
+        
+        self.worksheets = [configDict[x].split(',') for x in configDict.keys() if x.startswith('labWorksheet')]
+        self.worksheets = list(itertools.chain(*self.worksheets))
+        
+    def read_plate_info(self, configDict: dict) -> bool:
+        """Reads plate information from a CSV file and updates/creates the sampleInfo DataFrame inplace.
+
+        Args:
+            infoPath (str): Path to the CSV file containing plate information.
+        
+        Returns:
+            bool: True if the file was read successfully, False if the file does not exist.
+
+        Side Effects:
+            Prints messages to the console if the file is not found or other status updates.
+        """
+        
+        # TODO: Check whether the new sample info is the same as that read from\
+        #  the raw data file and flag any differences. Currently the existing\
+        #  sample info is simply overwritten.
+        
+        infoPath = get_info_path(configDict)
+        
+        if not os.path.exists(infoPath):
+            print('sampleInfoFile was not found at the path:')
+            print(infoPath)
+            print('If the file should exist, please check the configDict,\
+                   otherwise ignore this message')
+            # print('Returning False')
+            return False
+        else:
+            self.sampleInfo = pd.read_csv(infoPath, index_col=0)
+            return True
+        
+
+
+
+    
+    def infer_plate_info(self, configDict: dict, writeInfo: bool = True) -> None: 
+                         
+        # sampleInfo = infer_plate_info(sampleInfo ,configDict['rootDir'], worksheets)
+
+    # def infer_plate_info(sampleInfo, rootDir, wsFiles):
+
+
+        # Round AOI surface area values to match values from worksheets
+        self.sampleInfo.loc['AOI surface area'] = \
+                    [round(x) for x in self.sampleInfo.loc['AOI surface area']]
+        #Create an list of row names for the wells
+        indexList = list(map(chr, range(ord('A'), ord('H')+1)))
+        #create a list of column names for the wells
+        columnList = [str(n).zfill(2) for n in range(1, 13)]
+        validWells = make_valid_well_IDs(indexList, columnList)
+
+        wsList = [] # create a list of worksheet files from the configDict
+        wellDFs = []  # Set up empty dataframe to be populated with sample names
+        print(os.getcwd())
+        for x in self.worksheets:
+            wsList.append(read_Surf_Areas(os.path.join(configDict['rootDir'], x.strip()),
+                        indexList, columnList))
+            wellDFs.append(pd.DataFrame(data='', index=indexList,
+                        columns=columnList))
+        print('wsList')
+        print(wsList)
+        print(len(wsList))
+        
+
+        self.sampleInfo = match_wells_to_AOIs(self.sampleInfo, wsList, wellDFs, validWells)
+
+
+        infoPath = os.path.join(configDict['rootDir'], configDict['sampleInfoFile'])
+        if writeInfo:
+            self.sampleInfo.to_csv(os.path.join(self.dataPath[:self.dataPath.rfind('/')],'sampleInfo_with_wells.csv'))
+
+
 
     def drop_AOIs(self, includes, writeOrig=False):
         dropAOIs = [x for x in list(self.data.columns) if (x in includes)]
@@ -198,6 +392,35 @@ class MasterData:
         return self.ERCCData.copy()
 
 
+
+def make_valid_well_IDs(indexList, columnList):
+    validWells = [] # List of valid well IDS
+    for i in indexList:
+        for c in columnList:
+            validWells.append(i+c)
+    return validWells
+
+
+def get_info_path(configDict: dict) -> str:
+    """Gets the path to the plate information file from the configuration dictionary.
+
+    Args:
+        configDict (dict): Dictionary containing configuration parameters.
+    
+    Returns:
+        str: Path to the plate information file.
+    """
+    infoPath = os.path.join(configDict['rootDir'], configDict['sampleInfoFile'])
+    # if os.path.exists(infoPath):
+    #     return infoPath
+    # else:
+    #     print('sampleInfoFile not found in configDict')
+    #     print('Please check the configDict for the correct path')
+    #     print('Returning empty string')
+    #     return ''
+    return infoPath
+
+
 def check_plate_info(sampleInfo):
     # Check Well, Row, Plate, Col fields in in sampleInfo
     # Number of values should be less than number of samples if info has not
@@ -209,53 +432,34 @@ def check_plate_info(sampleInfo):
 # ToDo : create function to check if all wells in a plate match by
 # surface area
 
+def match_wells_to_AOIs(sampleInfo, wsList, wellDFs, validWells) -> pd.DataFrame:
 
-def infer_plate_info(sampleInfo, rootDir, wsFiles):
-    # global sampleInfo
-    # global configDict
-    sampleInfo.loc['AOI surface area'] = \
-                   [round(x) for x in sampleInfo.loc['AOI surface area']]
-    indexList = list(map(chr, range(ord('A'), ord('H')+1)))
-    columnList = [str(n).zfill(2) for n in range(1, 13)]
-    validWells = []
-    for i in indexList:
-        for c in columnList:
-            validWells.append(i+c)
-    wsList = []
-    wellDFs = []  # Set up empty dataframe to be populated with sample names
-    for x in wsFiles:
-        wsList.append(read_Surf_Areas(os.path.join(rootDir, x.strip()),
-                      indexList, columnList))
-        wellDFs.append(pd.DataFrame(data='', index=indexList,
-                       columns=columnList))
-    wsAreaList = []
-    allArea = []
-    print('wsList')
-    print(wsList)
-    print(len(wsList))
+    wsAreaList = [] # create a list of lists of surface area values. Each worksheet has its own list.
+    allArea = [] # create a list of all surface area values from all worksheets
     for i, ws in enumerate(wsList):
         wsAreaList.append(list(wsList[i].values.flatten()))
         allArea.extend(wsAreaList[i])
     print(allArea)
-    allArea = [k for k in allArea if not np.isnan(k)]
-    collect = cnt(allArea)
+    allArea = [k for k in allArea if not np.isnan(k)] # remove NaN values from allArea list
+
+
+
+    collect = cnt(allArea) # count the occurrences of each surface area value
     print(collect)
-    # collect = [k for k in collect if not np.isnan(k)]
-    print(collect)
+    # # collect = [k for k in collect if not np.isnan(k)]
+    # print(collect)
     unique = [int(k) for k in collect.keys() if collect[k] == 1]
     nonUnique = [int(k) for k in collect.keys() if collect[k] != 1]
-    # unique = [k for k in collect if collect[k] ==1]
-    # unique = [k for k in unique if not np.isnan(k)]
-    # unique = [int(k) for k in unique]
-    # nonUnique = [k for k in collect.keys() if collect[k] !=1]
-    # nonUnique = [k for k in unique if not np.isnan(k)]
-    # nonUnique = [int(k) for k in unique]
-    plates = (wsList[0],)
-    SAWellDict = {}
-    SAPlateDict = {}
-    AOItoWellDict = {}
-    AOItoPlateDict = {}
-    PlateWellDict = {1: [], 2: []}
+
+
+    # plates = (wsList[0],) # Tuple of worksheets, currently only one worksheet is used
+    SAWellDict = {} # Dictionary to store surface area well information
+    SAPlateDict = {} # Dictionary to store surface area plate information
+    AOItoWellDict = {} # Dictionary to store AOI to well mapping
+    AOItoPlateDict = {} # Dictionary to store AOI to plate mapping
+
+    # TODO: Make the following dictionary creation dynamic based on the number of worksheets
+    PlateWellDict = {1: [], 2: []} # Dictionary to store plate to well mapping
     for i, plate in enumerate(wsList):
         for col in plate.columns:
             print(col)
@@ -270,7 +474,7 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
                 if ((not val == 0) and (val in unique)):
                     SAWellDict[val] = row + col
                     possibleMatches = sampleInfo.loc[:, sampleInfo.T[
-                                      'AOI surface area'] == val].columns
+                                    'AOI surface area'] == val].columns
                     if len(possibleMatches == 1):
                         wellDFs[i].loc[row, col] = possibleMatches[0]
                         AOItoWellDict[possibleMatches[0]] = row + col
@@ -289,16 +493,107 @@ def infer_plate_info(sampleInfo, rootDir, wsFiles):
         toLocate, validWells, AOItoPlateDict, AOItoWellDict,
         PlateWellDict, wellDFs)
     AOIWell = pd.DataFrame(data=AOItoWellDict.values(),
-                           columns=['Well'], index=AOItoWellDict.keys()).T
+                        columns=['Well'], index=AOItoWellDict.keys()).T
     AOIRow = pd.DataFrame(data=[x[0] for x in AOItoWellDict.values()],
-                          columns=['Row'], index=AOItoWellDict.keys()).T
+                        columns=['Row'], index=AOItoWellDict.keys()).T
     AOICol = pd.DataFrame(data=[x[1:] for x in AOItoWellDict.values()],
-                          columns=['Col'], index=AOItoWellDict.keys()).T
+                        columns=['Col'], index=AOItoWellDict.keys()).T
     AOIPlate = pd.DataFrame(data=AOItoPlateDict.values(),
                             columns=['Plate'], index=AOItoPlateDict.keys()).T
     plateInfo = pd.concat([AOIWell, AOIRow, AOICol, AOIPlate])
     sampleInfo = pd.concat([sampleInfo, plateInfo])
     return(sampleInfo)
+
+
+# def infer_plate_info(sampleInfo, rootDir, wsFiles):
+#     # global sampleInfo
+#     # global configDict
+#     sampleInfo.loc['AOI surface area'] = \
+#                    [round(x) for x in sampleInfo.loc['AOI surface area']]
+#     indexList = list(map(chr, range(ord('A'), ord('H')+1)))
+#     columnList = [str(n).zfill(2) for n in range(1, 13)]
+#     validWells = []
+#     for i in indexList:
+#         for c in columnList:
+#             validWells.append(i+c)
+#     wsList = []
+#     wellDFs = []  # Set up empty dataframe to be populated with sample names
+#     for x in wsFiles:
+#         wsList.append(read_Surf_Areas(os.path.join(rootDir, x.strip()),
+#                       indexList, columnList))
+#         wellDFs.append(pd.DataFrame(data='', index=indexList,
+#                        columns=columnList))
+#     wsAreaList = []
+#     allArea = []
+#     print('wsList')
+#     print(wsList)
+#     print(len(wsList))
+#     for i, ws in enumerate(wsList):
+#         wsAreaList.append(list(wsList[i].values.flatten()))
+#         allArea.extend(wsAreaList[i])
+#     print(allArea)
+#     allArea = [k for k in allArea if not np.isnan(k)]
+#     collect = cnt(allArea)
+#     print(collect)
+#     # collect = [k for k in collect if not np.isnan(k)]
+#     print(collect)
+#     unique = [int(k) for k in collect.keys() if collect[k] == 1]
+#     nonUnique = [int(k) for k in collect.keys() if collect[k] != 1]
+#     # unique = [k for k in collect if collect[k] ==1]
+#     # unique = [k for k in unique if not np.isnan(k)]
+#     # unique = [int(k) for k in unique]
+#     # nonUnique = [k for k in collect.keys() if collect[k] !=1]
+#     # nonUnique = [k for k in unique if not np.isnan(k)]
+#     # nonUnique = [int(k) for k in unique]
+#     plates = (wsList[0],)
+#     SAWellDict = {}
+#     SAPlateDict = {}
+#     AOItoWellDict = {}
+#     AOItoPlateDict = {}
+#     PlateWellDict = {1: [], 2: []}
+#     for i, plate in enumerate(wsList):
+#         for col in plate.columns:
+#             print(col)
+#             for row in plate.index:
+#                 print(row)
+#                 # val = int(plate.loc[row, col])
+#                 val = plate.loc[row, col]
+#                 if np.isnan(val):
+#                     val = 0
+#                     continue
+#                 val = int(val)
+#                 if ((not val == 0) and (val in unique)):
+#                     SAWellDict[val] = row + col
+#                     possibleMatches = sampleInfo.loc[:, sampleInfo.T[
+#                                       'AOI surface area'] == val].columns
+#                     if len(possibleMatches == 1):
+#                         wellDFs[i].loc[row, col] = possibleMatches[0]
+#                         AOItoWellDict[possibleMatches[0]] = row + col
+#                     else:
+#                         print('possibleMatches')
+#                         print(possibleMatches)
+#                         print(val)
+#                         continue
+#                     if val in wsAreaList[i]:
+#                         print(val)
+#                         SAPlateDict[val] = 1
+#                         PlateWellDict[i+1].append(row+col)
+#                         AOItoPlateDict[possibleMatches[0]] = i+1
+#     toLocate = make_locate_list(sampleInfo, AOItoWellDict)
+#     AOItoPlateDict, AOItoWellDict, PlateWellDict, wellDFs = enter_locations(
+#         toLocate, validWells, AOItoPlateDict, AOItoWellDict,
+#         PlateWellDict, wellDFs)
+#     AOIWell = pd.DataFrame(data=AOItoWellDict.values(),
+#                            columns=['Well'], index=AOItoWellDict.keys()).T
+#     AOIRow = pd.DataFrame(data=[x[0] for x in AOItoWellDict.values()],
+#                           columns=['Row'], index=AOItoWellDict.keys()).T
+#     AOICol = pd.DataFrame(data=[x[1:] for x in AOItoWellDict.values()],
+#                           columns=['Col'], index=AOItoWellDict.keys()).T
+#     AOIPlate = pd.DataFrame(data=AOItoPlateDict.values(),
+#                             columns=['Plate'], index=AOItoPlateDict.keys()).T
+#     plateInfo = pd.concat([AOIWell, AOIRow, AOICol, AOIPlate])
+#     sampleInfo = pd.concat([sampleInfo, plateInfo])
+#     return(sampleInfo)
 
 
 def read_Surf_Areas(wsPath, indexList, columnList):
@@ -440,14 +735,15 @@ def enter_locations(toLocate, validWells, AOItoPlateDict, AOItoWellDict,
     # ToDo: Confirm that all entries appear correct (Surface Areas match)
 
 
-def read_plate_info(masterData, infoPath):
-    masterData.sampleInfo = pd.read_csv(infoPath, index_col=0)
-    sampleInfo = masterData.sampleInfo
-    return (sampleInfo)
+# def read_plate_info(masterData, infoPath):
+#     masterData.sampleInfo = pd.read_csv(infoPath, index_col=0)
+#     sampleInfo = masterData.sampleInfo
+#     return (sampleInfo)
 
 
 def read_config():
-    # read in paths from config file
+    # Read in config file and return a dictionary with paths and other
+    # parameters
     configDict = {
         'rootDir': '',
         'initialDataPath': '',
@@ -456,27 +752,35 @@ def read_config():
         'projectName': '',
         'selectedData': []
     }
+    if not os.path.exists('config.txt'):
+        print('config.txt not found, please create a config file')
+        return configDict
+    print('Reading config.txt')
     with open('config.txt', 'r') as f:
+        # Read config file and populate configDict
         lines = f.readlines()
         for line in lines:
             if ((not line.startswith('#')) and (not line.strip() == '')):
                 line = line.strip()
                 fields = line.split(':')
                 print(f'{fields[0]} : {fields[1]}')
-                if fields[0].strip() == 'initialDataPath':
+                if len(fields) < 2:
+                    print('Error in config.txt, line: {}'.format(line))
+                    continue
+                if fields[0].strip() == 'initialDataPath':  # Path to initial data
                     configDict[fields[0].strip()] = fields[1].strip(
                         ).strip('\'')
-                elif fields[0].strip() == 'probeThresholdIdx':
+                elif fields[0].strip() == 'probeThresholdIdx':  # Index of probe threshold
                     configDict[fields[0].strip()] = int(fields[1].strip(
                         ).strip('\''))
-                elif fields[0].strip() == 'selectedData':
+                elif fields[0].strip() == 'selectedData':  # List of selected data
                     tempList = fields[1].strip().strip('\'').split(',')
                     tempList = [x.strip() for x in tempList]
                     tempList = [x for x in tempList if not x == '']
                     configDict['selectedData'] = tempList
                 else:
                     configDict[fields[0].strip()] = fields[1].strip(
-                        ).strip('\'')
+                        ).strip('\'')  # Load other parameters into dictionary
     # ToDo: Add checks to ensure that minimal fields have been populated.
     # Raise errors or warnings
     return configDict

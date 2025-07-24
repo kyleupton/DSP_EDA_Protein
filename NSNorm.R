@@ -48,7 +48,12 @@ dim(Nano_ExpressionMatrix)
 
 # #############################################################################################
 # ###############  All 84 different normalization - using NanoStringNorm package ##############
-exportDir = file.path(dataDir, opt$subdir)
+getwd()
+dataDir
+opt$subdir
+# exportDir = file.path(dataDir, opt$subdir)
+exportDir = file.path(opt$subdir)
+exportDir
 dir.create(exportDir, showWarnings = FALSE)
 setwd(exportDir)
 

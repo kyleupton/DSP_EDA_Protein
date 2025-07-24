@@ -1,5 +1,5 @@
 projectName : example
-rootDir : /output/path/here/
+rootDir : ./
 initialDataPath : Initial Dataset.xlsx
 QCDataPath : Default_QC.xlsx
 labWorksheet01Path : Lab_Worksheet_P1001250001413A.txt
